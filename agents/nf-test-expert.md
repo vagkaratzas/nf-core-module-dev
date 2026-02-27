@@ -58,6 +58,11 @@ export NXF_SINGULARITY_CACHEDIR="/home/vangelis/Desktop/Tools/singularity"
 nf-test test /path/to/main.nf.test --profile +singularity --verbose
 ```
 
+To run a single test by name (faster iteration when only one test needs fixing):
+```bash
+nf-test test /path/to/main.nf.test --profile +singularity --verbose --tag "<test_name>"
+```
+
 ## Assertion priority
 
 1. `snapshot(process.out).match()` — always try this first
