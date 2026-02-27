@@ -53,5 +53,11 @@ In nf-test `when { process { """ ... """ } }` triple-quoted strings, `${var}` is
 - Genome properties flatfile: download via ARIA2 from `https://raw.githubusercontent.com/ebi-pf-team/genome-properties/refs/heads/master/flatfiles/genomeProperties.txt`
 - Base URL: `https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/`
 
+## Running a Single Test
+Use `--tag "<test_name>"` to run only one specific test — do NOT run all tests when only one is being added/changed:
+```bash
+nf-test test /path/to/main.nf.test --profile +singularity --verbose --tag "sarscov2 - proteome - no_search"
+```
+
 ## Detailed Notes
 See: `patterns.md`
