@@ -41,9 +41,10 @@ Read all 20 `main.nf` files. Note any patterns not in memory and update before p
    - Author: `@vagkaratzas`
    - Has meta: `yes`
    - Resource label: from step 2
-   - Bioconda env: use auto-detected if found; otherwise leave placeholders and notify user
+   - Bioconda env: use auto-detected if found; otherwise **stop, leave placeholders, and ask user to fill container/conda fields before continuing**
 4. **Populate `environment.yml`**: correct package, channel (bioconda > conda-forge), pinned version, minimum deps only
 5. **Populate `main.nf`**: follow rules below
+6. **Create `nextflow.config` if needed**: If the tool requires mandatory `ext.args`, fixed `publishDir` settings, or specific process config to run correctly, create a `nextflow.config` at the module root. Study reference modules to see when this is needed.
 
 ## Mode B: Update existing module
 
@@ -69,7 +70,8 @@ When done, report to caller (user or nf-module-manager):
 - Files created/modified with paths
 - Resource label chosen and why
 - Any placeholders left that need manual filling (container, conda env)
-- Anything nf-test-expert or nf-secretary should know about non-obvious outputs
+- Whether a root `nextflow.config` was created and why
+- Anything nf-test-expert or nf-secretary should know about non-obvious outputs or required test configs
 
 ## Memory
 

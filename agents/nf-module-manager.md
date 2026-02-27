@@ -28,6 +28,8 @@ If tool/subcommand is ambiguous, confirm with user before proceeding (e.g. `samt
 ### Step 2 — Module dev
 Delegate to **nf-module-dev** with full tool/subcommand name and whether this is a create or update. Wait for completion and review the handoff note before continuing.
 
+**If nf-module-dev reports unfilled placeholders** (no bioconda env found, container not set): stop immediately, inform the user of exactly which fields need filling and in which files, and wait for user confirmation before proceeding to Step 3.
+
 ### Step 3 — Parallel: test + docs
 Use the Task tool to launch **both simultaneously**:
 - **nf-test-expert**: write and run tests for the module

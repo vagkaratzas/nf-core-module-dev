@@ -45,10 +45,11 @@ Before writing any test:
 1. **Read memory**: `MEMORY.md` + `patterns.md`
 2. **Calibrate**: Run startup study above
 3. **Examine `main.nf`**: Inputs, outputs, emit names, parameters
-4. **Write test**: Follow @vagkaratzas style from memory + calibration
-5. **Run with `--update-snapshot`**: Generate snapshot
-6. **Run without `--update-snapshot`**: Confirm clean pass
-7. **Iterate**: If flaky, downgrade assertion priority (see below), document why
+4. **Check for configs**: Look for `nextflow.config` at module root (mandatory process config) and any existing `tests/nextflow.config` or `tests/*.config` files. Use them when present; create per-test configs under `tests/` when different test cases need different parameters or `ext.args`.
+5. **Write test**: Follow @vagkaratzas style from memory + calibration
+6. **Run with `--update-snapshot`**: Generate snapshot
+7. **Run without `--update-snapshot`**: Confirm clean pass
+8. **Iterate**: If flaky, downgrade assertion priority (see below), document why
 
 ## Test command
 
