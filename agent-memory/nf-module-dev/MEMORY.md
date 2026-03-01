@@ -2,13 +2,18 @@
 
 ## Style patterns (confirmed across modules, Feb 2026)
 
-- `def` is required for ALL local variables in both `script` and `stub` blocks
-- `stub` block: always redeclare `def args`, `def prefix`, and any derived vars
+- Variables used in `output:` block globs (e.g. `prefix`, `out_extension`) MUST be process-scoped (bare assignment, no `def`) — the linter enforces this
+- Variables only used inside the script heredoc (e.g. `args`, `comp_flag`) should use `def`
+- `stub` block: redeclare `prefix` and derived output vars as bare (no `def`); use `def` for `args` and flag intermediates
 - `stub` block: `echo "$args"` after `touch` commands when args are declared
 - Optional file path inputs use `path optional_file` in input channel; conditional use: `def flag = optional_file ? "-x ${optional_file}" : ''`
 - Optional outputs use `, optional: true, emit: name` syntax
-- `topic: 'versions'` should be added to the versions output line: `path "versions.yml", emit: versions, topic: 'versions'`
-  - NOTE: As of Feb 2026, NO modules in the repo yet use `topic: 'versions'` — it is a requested convention not yet widely adopted
+- **Versions output (new standard, Mar 2026)**: Use eval tuple — NO `cat <<-END_VERSIONS` heredoc. Pattern:
+  ```nextflow
+  tuple val("${task.process}"), val('toolname'), eval("tool --version 2>&1 | sed 's/tool //'"), topic: versions, emit: versions_toolname
+  ```
+  Note: `topic: versions` — NO quotes around `versions` (unlike the string `'versions'` in old path-based approach).
+- **meta.yml sync**: After adding `path auxiliary_file` (or any new path input), `nf-core modules lint --fix` will add `auxiliary_file: {}` (empty). Must manually fill in `type`, `description`, `pattern`, `ontologies: []` — the schema rejects empty `{}` entries.
 
 ## Resource label conventions
 
@@ -21,12 +26,14 @@
 
 ## clipkit-specific notes
 
-- `-l/--log` flag (no arg) creates `<output>.clipkit.log` — separate from stdout redirect
-- `-c/--complementary` flag (no arg) creates `<output>.clipkit.complement`
+- `-l/--log` is a boolean `store_true` flag — creates `<output_file>.log` (e.g. `${prefix}.${out_extension}.log`)
+- `-c/--complementary` is a boolean `store_true` flag — creates `<output_file>.complement`
+- Do NOT use stdout redirect for the log; `-l` writes the file automatically
 - `-a/--auxiliary_file` takes a file path — for `cst` mode only
 - `-of/--output_file_format` specifies format (fasta, phylip, etc.) — not the file extension per se
-- stdout from clipkit is captured as `> ${prefix}.log` in the module
 - Output file naming: `${prefix}.${out_extension}` where `out_extension` defaults to "clipkit"
+- `complementary` (`-c`) is NOT a channel input — users pass it via `ext.args` from external config
+- `auxiliary_file` is a `path` input (optional); controls `-a` flag via `def aux_flag = auxiliary_file ? "-a ${auxiliary_file}" : ''`
 
 ## Common patterns for optional file inputs
 

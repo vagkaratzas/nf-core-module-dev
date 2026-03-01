@@ -21,8 +21,38 @@
 ## Output Block
 
 - NOT a list — it's a mapping keyed by emit name (unlike input which is a list)
-- Each emit name maps to a list-of-lists mirroring the tuple structure
+- Each emit name maps to a list of tuples; tuple channels use list-of-lists (`- -`) notation
+- Scalar (non-tuple) channels like `path("versions.yml")` use a single-level list (`- versions.yml:`)
+- `val` (non-tuple) input channels like `val out_format` use a bare mapping entry (no outer `-`): `- out_format:\n    type: string`
 - Always document ALL emit channels including version channels
+- `ontologies: []` is added automatically by `--fix` for file entries without EDAM terms; keep them
+- `versions.yml` gets `ontologies:\n  - edam: http://edamontology.org/format_3750` (YAML format) — added by --fix
+
+### CRITICAL: Output block list vs mapping
+
+The `output:` block MUST be a YAML mapping (object), NOT a list. Using list syntax (`- clipkit:`, `- log:`) triggers schema error "Incorrect type. Expected 'object(Meta yaml)'". Correct form:
+
+```yaml
+output:
+  clipkit:          # NOT "- clipkit:"
+  - - meta:
+        type: map
+        ...
+    - ${prefix}.${out_extension}:
+        type: file
+        ...
+  log:
+  - - meta:
+        type: map
+        ...
+    - ${prefix}.log:
+        type: file
+        ...
+  versions:
+  - versions.yml:
+      type: file
+      ...
+```
 
 ## Topic-Based Versions (new pattern as of ~2025)
 
