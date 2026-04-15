@@ -75,7 +75,7 @@ Create `.claude-plugin/plugin.json`:
 }
 ```
 
-### Task 2 — [ ] Add `hooks/hooks.json`
+### Task 2 — [x] Add `hooks/hooks.json`
 
 Create `hooks/hooks.json` to inject the bootstrap skill at session start.
 Study how superpowers does this at:
