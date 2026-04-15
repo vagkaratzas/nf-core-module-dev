@@ -138,7 +138,7 @@ snapshot file isn't present yet. This is a sequencing dependency, not a meta.yml
 - The memory update section is REMOVED (skills don't write memory)
 - The "never write module files yourself" principle remains prominent
 
-### Task 5 — [ ] Rewrite `agents/nf-module-dev.md`
+### Task 5 — [x] Rewrite `agents/nf-module-dev.md`
 
 Keep the full existing workflow unchanged. Changes:
 1. Drop `memory: user` from frontmatter
