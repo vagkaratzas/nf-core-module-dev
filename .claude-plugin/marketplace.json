@@ -1,0 +1,20 @@
+{
+  "name": "nf-core-module-dev-marketplace",
+  "description": "Marketplace for the nf-core-module-dev plugin",
+  "owner": {
+    "name": "Evangelos Karatzas",
+    "email": "vagkaratzas1990@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "nf-core-module-dev",
+      "description": "Agents and skills for creating, testing, and documenting Nextflow nf-core modules",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "Evangelos Karatzas",
+        "email": "vagkaratzas1990@gmail.com"
+      }
+    }
+  ]
+}

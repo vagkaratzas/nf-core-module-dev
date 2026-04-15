@@ -24,7 +24,8 @@ Because the `nf-module-manager` runs as a **skill** in your main session (not a 
 ## Installation
 
 ```bash
-claude install github:vagkaratzas/nf-core-module-dev
+claude plugin marketplace add vagkaratzas/nf-core-module-dev
+claude plugin install nf-core-module-dev@vagkaratzas
 ```
 
 Then start a new session. The plugin bootstraps automatically.

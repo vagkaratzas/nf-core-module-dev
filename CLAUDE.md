@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is the **nf-core-module-dev** Claude Code plugin — a set of agents and skills for creating, testing, and documenting nf-core Nextflow modules. It is modelled on the superpowers plugin structure and installable via:
 
 ```bash
-claude install github:vagkaratzas/nf-core-module-dev
+claude plugin marketplace add vagkaratzas/nf-core-module-dev
+claude plugin install nf-core-module-dev@vagkaratzas
 ```
 
 ## Structure
