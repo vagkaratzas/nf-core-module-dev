@@ -320,7 +320,7 @@ Rewrite to reflect:
 - How to update agent knowledge (edit reference sections, PR back)
 - Runtime memory path: `~/.claude/agent-memory/<name>/`
 
-### Task 10 — [ ] Rename GitHub repo
+### Task 10 — [x] Rename GitHub repo
 
 In GitHub settings: rename `claude-agents` → `nf-core-module-dev`.
 This is a manual step — cannot be done via CLI without GitHub auth.
