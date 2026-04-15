@@ -2,91 +2,66 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Repository Purpose
+## Repository purpose
 
-This repo stores agent definitions and their persistent memory for nf-core Nextflow module development. Agents are Markdown files with YAML frontmatter that Claude Code loads as specialized subagents.
+This is the **nf-core-module-dev** Claude Code plugin — a set of agents and skills for creating, testing, and documenting nf-core Nextflow modules. It is modelled on the superpowers plugin structure and installable via:
+
+```bash
+claude install github:vagkaratzas/nf-core-module-dev
+```
 
 ## Structure
 
 ```
-agents/           — Agent definition files (*.md)
-agent-memory/     — Persistent memory directories, one per agent
-  nf-module-dev/  — MEMORY.md (style patterns, resource labels, tool-specific notes)
-  nf-module-manager/ — MEMORY.md (orchestration rules, retry triggers)
-  nf-secretary/   — MEMORY.md + patterns.md (meta.yml conventions, lint rules, EDAM ontologies)
-  nf-test-expert/ — MEMORY.md + patterns.md (test style, assertion priorities, known pitfalls)
+nf-core-module-dev/
+├── .claude-plugin/plugin.json   ← plugin manifest (name, version, author)
+├── agents/
+│   ├── nf-module-dev.md         ← creates/updates main.nf + environment.yml
+│   ├── nf-test-expert.md        ← writes and runs nf-tests + snapshots
+│   └── nf-secretary.md          ← writes and lints meta.yml
+├── skills/
+│   ├── nf-module-manager/
+│   │   └── SKILL.md             ← end-to-end orchestration workflow
+│   └── using-nf-core-module-dev/
+│       └── SKILL.md             ← session-start bootstrap
+└── hooks/
+    └── hooks.json               ← injects bootstrap skill at session start
 ```
 
-Agent memory under `agent-memory/` is separate from the user's personal memory at `~/.claude/agent-memory/` — those are symlinked or referenced by agents at runtime.
+## Agent and skill responsibilities
 
-## Agent Responsibilities
+| Component | Owns | Never touches |
+|-----------|------|---------------|
+| `nf-module-dev` agent | `main.nf`, `environment.yml` | tests, meta.yml |
+| `nf-test-expert` agent | `tests/main.nf.test`, snapshots | main.nf, meta.yml |
+| `nf-secretary` agent | `meta.yml` | main.nf, tests |
+| `nf-module-manager` skill | Orchestration only — never writes files | everything |
 
-| Agent | Files it owns | Does NOT touch |
-|-------|--------------|----------------|
-| `nf-module-dev` | `main.nf`, `environment.yml` | tests, meta.yml |
-| `nf-test-expert` | `tests/main.nf.test`, snapshots | main.nf, meta.yml |
-| `nf-secretary` | `meta.yml` | main.nf, tests |
-| `nf-module-manager` | Orchestrator only — never writes files | everything |
+## Agent file structure
 
-## Agent Frontmatter Fields
+Each agent `.md` file has three zones:
+1. **Frontmatter** — `name`, `description`, `model`, `color` (no `memory` field — not a real Claude Code field)
+2. **Workflow** — step-by-step process
+3. **Reference sections** — stable domain knowledge embedded directly (style patterns, conventions, lookup tables)
+4. **Runtime memory** — instructions to write session findings to `~/.claude/agent-memory/<name>/`
 
-Standard fields in agent `.md` files:
-- `name`: agent identifier used in Claude Code's Agent tool `subagent_type`
-- `description`: trigger condition shown in the Agent tool selector (multi-line strings use `"..."`)
-- `model`: `sonnet` | `opus` | `haiku`
-- `color`: display color in the UI
-- `memory`: `user` — agents read user-level memory on startup
+The reference sections replace the old `agent-memory/` directory. When a runtime-discovered pattern stabilises, it gets PRed back into the agent file.
 
-## Editing Agents
+## Adding or updating knowledge
 
-When editing an agent definition:
-- The `description` field drives when Claude Code auto-selects the agent — keep it precise with concrete examples
-- Startup calibration blocks (reading recent modules by @vagkaratzas) are intentional — do not remove them; they keep agents aligned with current community style
-- Memory paths in agent files point to `~/.claude/agent-memory/<agent-name>/` — these are the live runtime memory locations, not this repo's `agent-memory/` directory
+- Edit the relevant `## Reference: ...` section in the agent file directly
+- For nf-secretary: EDAM ontology terms, lint rules, YAML conventions
+- For nf-test-expert: assertion patterns, known non-deterministic outputs, pitfalls
+- For nf-module-dev: main.nf style rules, resource label conventions
 
-## Memory Files
+## Path placeholders
 
-`MEMORY.md` in each `agent-memory/` directory is an index (≤200 lines). Detail lives in `patterns.md`.
+Agent files use `<modules_repo>` and `<singularity_cache>` as placeholders for paths that vary per user. Agents ask the user for these values if not already known.
 
-When updating memory:
-- Keep `MEMORY.md` as a quick-reference index
-- Put verbose patterns, examples, and edge cases in `patterns.md`
-- Remove stale entries rather than appending contradictions
+## Plugin manifest
 
-## Key External Paths (referenced by agents)
+`.claude-plugin/plugin.json` follows the Claude Code plugin schema. Version should be bumped on any meaningful change before pushing.
 
-- Modules repo: `/home/vangelis/Desktop/Projects/modules`
-- Module files: `modules/nf-core/<tool>/<subcommand>/`
-- Singularity cache: `/home/vangelis/Desktop/Tools/singularity`
-- nf-test config: `/home/vangelis/Desktop/Projects/modules/tests/config/nf-test.config`
-- nf-core CLI: `/home/vangelis/miniconda3/bin/nf-core` (version 3.5.2)
+## Hook
 
-## nf-test Commands
-
-```bash
-# Always set before running nf-test
-export NXF_SINGULARITY_CACHEDIR="/home/vangelis/Desktop/Tools/singularity"
-
-# Run all tests for a module
-nf-test test /path/to/main.nf.test --profile +singularity --verbose
-
-# Run a single test by name
-nf-test test /path/to/main.nf.test --profile +singularity --verbose --tag "<test_name>"
-
-# Run with snapshot update
-nf-test test /path/to/main.nf.test --profile +singularity --verbose --update-snapshot
-```
-
-## nf-core Commands
-
-```bash
-# Scaffold a new module
-cd /home/vangelis/Desktop/Projects/modules
-nf-core modules create <tool/subcommand> --empty-template
-
-# Lint a module
-nf-core modules lint <tool/subcommand>
-
-# Lint and auto-fix meta.yml
-nf-core modules lint <tool/subcommand> --fix
-```
+`hooks/session-start` reads `skills/using-nf-core-module-dev/SKILL.md` and injects it into the session context via `hookSpecificOutput.additionalContext`. `hooks/run-hook.cmd` is a cross-platform wrapper (Unix + Windows).

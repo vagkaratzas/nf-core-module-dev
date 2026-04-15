@@ -310,7 +310,7 @@ git rm agents/nf-module-manager.md
 git rm -r agent-memory/
 ```
 
-### Task 9 — [ ] Update `CLAUDE.md`
+### Task 9 — [x] Update `CLAUDE.md`
 
 Rewrite to reflect:
 - New repo name and purpose (installable Claude Code plugin)
