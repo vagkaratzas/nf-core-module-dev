@@ -1,0 +1,9 @@
+{
+  "name": "nf-core-module-dev",
+  "description": "Agents and skills for creating, testing, and documenting Nextflow nf-core modules",
+  "version": "1.0.0",
+  "author": { "name": "Evangelos Karatzas", "email": "vagkaratzas1990@gmail.com" },
+  "homepage": "https://github.com/vagkaratzas/nf-core-module-dev",
+  "repository": "https://github.com/vagkaratzas/nf-core-module-dev",
+  "license": "MIT"
+}

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# SessionStart hook for nf-core-module-dev plugin
+
+set -euo pipefail
+
+# Determine plugin root directory
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Read using-nf-core-module-dev bootstrap skill content
+skill_content=$(cat "${PLUGIN_ROOT}/skills/using-nf-core-module-dev/SKILL.md" 2>&1 || echo "Error reading using-nf-core-module-dev skill")
+
+# Escape string for JSON embedding
+escape_for_json() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+}
+
+session_context="<system-reminder>\nBase directory for this skill: ${PLUGIN_ROOT}/skills/using-nf-core-module-dev\n\n$(escape_for_json "$skill_content")\n</system-reminder>"
+
+# Output context injection as JSON (Claude Code format).
+printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context"
+
+exit 0
