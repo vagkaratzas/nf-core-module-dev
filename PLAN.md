@@ -303,7 +303,7 @@ Stubs always use priority 1.
 
 4. Runtime memory section at bottom.
 
-### Task 8 — [ ] Delete `agents/nf-module-manager.md` and `agent-memory/` directory
+### Task 8 — [x] Delete `agents/nf-module-manager.md` and `agent-memory/` directory
 
 ```bash
 git rm agents/nf-module-manager.md
