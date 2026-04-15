@@ -49,6 +49,7 @@ Only modify what is explicitly requested:
 - `def prefix = task.ext.prefix ?: "${meta.id}"`
 - `meta.single_end` handling where applicable
 - Named output channels for all meaningful outputs + always emit `versions` and the respective topic channels
+- Output paths: use `path("${prefix}.ext")` whenever the tool names its output after the input (the common case). Only fall back to a glob `path("*.ext")` when the output filename genuinely cannot be predicted from the prefix (e.g. the tool appends an unpredictable suffix). Using a glob when `${prefix}` would work is incorrect — it breaks the linter's `correct_meta_outputs` check and produces non-deterministic staging.
 - Stub block with `touch` for every output
 - No hardcoded params — use `$task.cpus`, `ext.args`, `ext.args2` etc.
 - Capture software version at runtime
