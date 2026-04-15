@@ -257,7 +257,7 @@ Always keep the format name comment after the EDAM URL.
 
 4. Runtime memory section at bottom (same pattern as nf-module-dev).
 
-### Task 7 — [ ] Rewrite `agents/nf-test-expert.md`
+### Task 7 — [x] Rewrite `agents/nf-test-expert.md`
 
 Keep full workflow unchanged. Changes:
 1. Drop `memory: user` from frontmatter
