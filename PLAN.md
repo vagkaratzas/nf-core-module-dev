@@ -183,7 +183,7 @@ Write new findings to `~/.claude/agent-memory/nf-module-dev/` during sessions.
 When a pattern stabilises, open a PR to add it to this file's reference sections.
 ```
 
-### Task 6 — [ ] Rewrite `agents/nf-secretary.md`
+### Task 6 — [x] Rewrite `agents/nf-secretary.md`
 
 Keep full workflow unchanged. Changes:
 1. Drop `memory: user` from frontmatter
