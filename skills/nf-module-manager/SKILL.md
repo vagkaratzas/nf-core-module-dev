@@ -9,9 +9,9 @@ You are orchestrating a full nf-core module build. Delegate ALL file writing to 
 
 | Agent | Responsibility |
 |-------|---------------|
-| `nf-module-dev` | `main.nf`, `environment.yml` — create or update |
-| `nf-test-expert` | `tests/main.nf.test`, snapshots — write and run |
-| `nf-secretary` | `meta.yml` — create or update |
+| `nf-core-module-dev:nf-module-dev` | `main.nf`, `environment.yml` — create or update |
+| `nf-core-module-dev:nf-test-expert` | `tests/main.nf.test`, snapshots — write and run |
+| `nf-core-module-dev:nf-secretary` | `meta.yml` — create or update |
 
 ## Workflow
 
@@ -21,25 +21,25 @@ If tool/subcommand is ambiguous, confirm with user before proceeding (e.g. `samt
 
 ### Step 2 — Module dev
 
-Spawn **nf-module-dev** with full tool/subcommand name and whether this is a create or update. Wait for its handoff note and review it before continuing.
+Spawn **nf-core-module-dev:nf-module-dev** with full tool/subcommand name and whether this is a create or update. Wait for its handoff note and review it before continuing.
 
-**If nf-module-dev reports unfilled placeholders** (no bioconda env found, container not set): stop immediately, inform the user of exactly which fields need filling and in which files, and wait for user confirmation before proceeding to Step 2b.
+**If nf-core-module-dev:nf-module-dev reports unfilled placeholders** (no bioconda env found, container not set): stop immediately, inform the user of exactly which fields need filling and in which files, and wait for user confirmation before proceeding to Step 2b.
 
 ### Step 2b — Resume module dev after placeholder fill (conditional)
 
-Only runs if Step 2 was paused for placeholder filling. Once the user confirms the fields are filled, re-spawn **nf-module-dev** to continue the module creation from where it stopped — populating `main.nf`, and creating `nextflow.config` if needed (steps 5–6 of its Mode A workflow). Wait for its handoff note before proceeding.
+Only runs if Step 2 was paused for placeholder filling. Once the user confirms the fields are filled, re-spawn **nf-core-module-dev:nf-module-dev** to continue the module creation from where it stopped — populating `main.nf`, and creating `nextflow.config` if needed (steps 5–6 of its Mode A workflow). Wait for its handoff note before proceeding.
 
 ### Step 3 — Parallel: write tests + write meta.yml
 
-Spawn **nf-test-expert** AND **nf-secretary** simultaneously using the Agent tool — for WRITING only:
-- **nf-test-expert**: write test file → run with `--update-snapshot` to generate snapshot → run again without `--update-snapshot` to confirm clean pass → report done
-- **nf-secretary**: write `meta.yml` → report done (no lint yet)
+Spawn **nf-core-module-dev:nf-test-expert** AND **nf-core-module-dev:nf-secretary** simultaneously using the Agent tool — for WRITING only:
+- **nf-core-module-dev:nf-test-expert**: write test file → run with `--update-snapshot` to generate snapshot → run again without `--update-snapshot` to confirm clean pass → report done
+- **nf-core-module-dev:nf-secretary**: write `meta.yml` → report done (no lint yet)
 
 Wait for BOTH to complete before proceeding.
 
 ### Step 3b — Lint (after snapshot exists)
 
-Once nf-test-expert confirms the snapshot is generated, instruct **nf-secretary** to run lint.
+Once nf-core-module-dev:nf-test-expert confirms the snapshot is generated, instruct **nf-core-module-dev:nf-secretary** to run lint.
 
 Reason: `nf-core modules lint` checks for `test_snapshot_exists` — lint will fail if the snapshot file isn't present yet. This is a sequencing dependency, not a meta.yml error.
 
@@ -47,18 +47,18 @@ Reason: `nf-core modules lint` checks for `test_snapshot_exists` — lint will f
 
 Attribute errors carefully:
 
-**Send back to nf-module-dev** if the error involves:
+**Send back to nf-core-module-dev:nf-module-dev** if the error involves:
 - Wrong/missing output channel names or signatures
 - Incorrect input channel structure
 - Missing or malformed versions emission
 - Incorrect conda/container directives
 - Any structural issue in `main.nf` or `environment.yml`
 
-**Send back to nf-test-expert** if the error involves:
+**Send back to nf-core-module-dev:nf-test-expert** if the error involves:
 - Test data paths or test configuration
 - Snapshot mismatches or assertion failures
 
-**Send back to nf-secretary** if the error involves:
+**Send back to nf-core-module-dev:nf-secretary** if the error involves:
 - meta.yml formatting or completeness
 - Lint errors or schema validation failures
 
@@ -76,6 +76,6 @@ After any agent fixes its output, re-run only that agent (not the full pipeline)
 ## Key principles
 
 - Never write module files yourself — always delegate
-- Always spawn nf-test-expert and nf-secretary in parallel (Step 3), never sequentially
+- Always spawn nf-core-module-dev:nf-test-expert and nf-core-module-dev:nf-secretary in parallel (Step 3), never sequentially
 - Keep user informed at each stage
 - Escalate to user if 3 retries exceeded or manual intervention needed (e.g. container placeholder)
