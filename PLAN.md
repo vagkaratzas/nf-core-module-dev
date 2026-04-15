@@ -113,7 +113,7 @@ This plugin provides agents and a skill for creating complete nf-core Nextflow m
 For end-to-end module work, ALWAYS invoke the `nf-module-manager` skill — never invoke the three agents manually in sequence yourself.
 ```
 
-### Task 4 — [ ] Create `skills/nf-module-manager/SKILL.md`
+### Task 4 — [x] Create `skills/nf-module-manager/SKILL.md`
 
 Extract workflow from `agents/nf-module-manager.md` and convert to a skill. Key changes from the old agent:
 
