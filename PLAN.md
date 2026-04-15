@@ -82,7 +82,7 @@ Study how superpowers does this at:
 `/home/vangelis/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/hooks/`
 Mirror the exact pattern used there (path resolution, hook type, matcher).
 
-### Task 3 — [ ] Create `skills/using-nf-core-module-dev/SKILL.md`
+### Task 3 — [x] Create `skills/using-nf-core-module-dev/SKILL.md`
 
 Bootstrap skill content:
 
