@@ -61,7 +61,15 @@ Agent files use `<modules_repo>` and `<singularity_cache>` as placeholders for p
 
 ## Plugin manifest
 
-`.claude-plugin/plugin.json` follows the Claude Code plugin schema. Version should be bumped on any meaningful change before pushing.
+`.claude-plugin/plugin.json` follows the Claude Code plugin schema. Both `plugin.json` and `marketplace.json` must stay in sync — use the bump script:
+
+```bash
+# Check current versions are in sync
+scripts/bump-version.sh --check
+
+# Bump to a new version (updates both files atomically)
+scripts/bump-version.sh 1.1.0
+```
 
 ## Hook
 

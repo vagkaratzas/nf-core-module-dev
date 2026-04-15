@@ -71,6 +71,17 @@ Agents carry their domain knowledge as embedded reference sections — no separa
 2. Edit the relevant `## Reference: ...` section in the agent `.md` file
 3. Submit a PR
 
+## Releasing
+
+Version numbers are kept in sync across `plugin.json` and `marketplace.json` using the included bump script:
+
+```bash
+# Check versions are in sync
+scripts/bump-version.sh --check
+
+# Bump to a new version
+scripts/bump-version.sh 1.1.0
+
 ## License
 
 MIT
