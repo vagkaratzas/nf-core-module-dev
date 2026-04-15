@@ -60,7 +60,7 @@ Source memory files to absorb:
 
 ## Implementation tasks
 
-### Task 1 — [ ] Add `.claude-plugin/plugin.json`
+### Task 1 — [x] Add `.claude-plugin/plugin.json`
 
 Create `.claude-plugin/plugin.json`:
 ```json
