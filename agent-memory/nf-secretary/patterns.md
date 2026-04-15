@@ -152,7 +152,14 @@ key to be `${prefix}.log`, NOT `*.log`. Using the wrong key causes a `correct_me
 - mmCIF: `http://edamontology.org/format_1477`
 - PDB: `http://edamontology.org/format_1476`
 - FASTA: `http://edamontology.org/format_1929`
+- FASTQ: `http://edamontology.org/format_1930`
+- Alignment format (generic): `http://edamontology.org/format_1921`
+- Alignment format TXT: `http://edamontology.org/format_2554`
+- FASTA-ALN (FASTA alignment): `http://edamontology.org/format_1984`
+- Sequence-like format (parent): `http://edamontology.org/format_1919`
+- Phylogenetic tree: `http://edamontology.org/format_2006`
 - OpenDX: no specific EDAM term — use `ontologies: []`
+- Log files (plain text): `http://edamontology.org/format_3671` (Plain text) — can be used for log files; previously noted as "no EDAM term" but format_3671 is valid
 
 Always keep (don't remove!) the comment at the end of the edam ontology with the specific format name!
 
@@ -177,3 +184,16 @@ Always keep (don't remove!) the comment at the end of the edam ontology with the
   - Input tuple: `val(meta), path(in), path(pqr)` — pqr can be a list of files
   - Outputs: `dx` (optional, enabled by `write pot dx` in .in file), `mc` (io.mc), `log`, versions_apbs
   - `.in` file accepts `.inp` extension for legacy compatibility
+- clipkit: homepage/docs = `https://jlsteenwyk.com/ClipKIT/`, dev = `https://github.com/JLSteenwyk/ClipKIT`, doi = `10.1371/journal.pbio.3001007`, licence = MIT, identifier = `biotools:clipkit`
+  - Outputs: `clipkit` (trimmed aln), `log` (per-site stats, always), `metadata` (.txt TSV per-site stats), `complementary` (optional), `json` (optional report)
+  - eval key: `clipkit --version 2>&1 | sed 's/clipkit //'` (unquoted in YAML, single-quotes inside)
+- caalm: homepage/dev = `https://github.com/lczong/CAALM`, PyPI = `https://pypi.org/project/caalm/`, licence = MIT, no DOI, identifier = `""`
+  - CAZyme annotation tool using ESM protein language model embeddings + FAISS
+  - **caalm/downloadmodels** outputs a single `models` emit: a 3-path tuple `tuple path("models/level0"), path("models/level1"), path("models/level2")` — meta.yml uses list-of-lists (`- -`) notation under the `models:` key
+  - **caalm/caalm** second input is `tuple path(level0), path(level1), path(level2)` (NOT a single `path(models)`)
+  - caalm/caalm input channels: (1) `tuple val(meta), path(fasta)` (2) `tuple path(level0), path(level1), path(level2)`
+  - Outputs: `predictions` (*_predictions.tsv), `probabilities` (*_probabilities.jsonl), `statistics` (*_statistics.tsv), `embeddings_level0/1/2` (*.npy, all optional), `log` (${prefix}.log, mandatory stdout redirect)
+  - eval key: `caalm --version 2>&1 | head -1` (unquoted in YAML)
+  - .npy (NumPy) files have no EDAM term — use `ontologies: []`
+  - JSONL uses EDAM `format_3464` (JSON)
+  - Log file uses EDAM `format_3671` (Plain text)

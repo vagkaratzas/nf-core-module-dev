@@ -20,5 +20,5 @@ See detailed notes in `patterns.md`.
 
 ## Confirmed working modules (reference)
 
-- `pygenprop/build`, `pygenprop/info`, `pharmcat/matcher`, `gemmi/cif2json`, `apbs`
+- `pygenprop/build`, `pygenprop/info`, `pharmcat/matcher`, `gemmi/cif2json`, `apbs`, `clipkit`, `caalm`
 - Details in: `patterns.md`
