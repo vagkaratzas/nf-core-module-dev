@@ -32,11 +32,9 @@ codex/           ← install.sh / uninstall.sh for Codex plugin installation
 
 ## Installing for Codex
 
-```bash
-./codex/install.sh   # then restart Codex
-```
+Codex support now lives in `.codex-plugin/plugin.json` and points at the shared repo-root `agents/`, `skills/`, and `hooks/` directories, so plugin stores should target the repository root directly.
 
-Re-run after `git pull`. See `codex/INSTALL.md` for full details.
+For environments that still need a local copy install, `./codex/install.sh` remains available as a fallback. Re-run it after `git pull`. See `codex/INSTALL.md` for full details.
 
 ## Adding knowledge
 

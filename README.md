@@ -34,13 +34,17 @@ Then start a new session. The plugin bootstraps automatically — you get the fu
 
 ### Codex
 
+Codex support now lives in `.codex-plugin/plugin.json` and points at the shared repo-root `agents/`, and `skills/` directories, so plugin stores can target the repository root directly.
+
+For local installs or environments that cannot consume the repo directly, the legacy fallback is still available:
+
 ```bash
 git clone https://github.com/vagkaratzas/nf-core-module-dev.git ~/.codex/nf-core-module-dev
 cd ~/.codex/nf-core-module-dev
 ./codex/install.sh
 ```
 
-Restart Codex (full quit). The full plugin is available: all three specialist agents plus `nf-module-manager`. Re-run `install.sh` after `git pull` to update. See [`codex/INSTALL.md`](codex/INSTALL.md) for details and uninstall instructions.
+Restart Codex (full quit). The full plugin is available: all three specialist agents plus `nf-module-manager` skill. Re-run `install.sh` after `git pull` to update when using the fallback flow. See [`codex/INSTALL.md`](codex/INSTALL.md) for details and uninstall instructions.
 
 ## Usage
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Install nf-core-module-dev as a full Codex plugin.
-# Copies the plugin structure to ~/.codex/.tmp/plugins/plugins/nf-core-module-dev/
+# Install nf-core-module-dev as a Codex plugin (local marketplace fallback).
+# Installs to ~/.codex/plugins/cache/local/nf-core-module-dev/<version>/
 # and normalises frontmatter so Codex loads all agents and skills correctly:
 #   - agents: keep name + description, set model: inherit (strip tools, color)
 #   - skills: keep name + description only (strip tools, model, color)
@@ -8,14 +8,18 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PLUGIN_DIR="${HOME}/.codex/.tmp/plugins/plugins/nf-core-module-dev"
+PLUGIN_JSON="${REPO_DIR}/.codex-plugin/plugin.json"
+VERSION="$(grep '"version"' "${PLUGIN_JSON}" | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')"
+PLUGIN_DIR="${HOME}/.codex/plugins/cache/local/nf-core-module-dev/${VERSION}"
+CONFIG_FILE="${HOME}/.codex/config.toml"
 
-echo "Installing nf-core-module-dev plugin"
+echo "Installing nf-core-module-dev plugin (v${VERSION})"
 echo "  from: ${REPO_DIR}"
 echo "  to:   ${PLUGIN_DIR}"
 echo
 
-# Normalise skill SKILL.md: keep name + description, strip all other FM fields
+# ── normalisation helpers ─────────────────────────────────────────────────────
+
 normalize_skill() {
     local src="$1"
     awk '
@@ -27,7 +31,6 @@ normalize_skill() {
     ' "${src}"
 }
 
-# Normalise agent .md: keep name + description, set model: inherit, strip tools/color
 normalize_agent() {
     local src="$1"
     awk '
@@ -47,27 +50,23 @@ safe_write() {
     mv "${tmp}" "${dest}"
 }
 
-# ── .codex-plugin manifest ───────────────────────────────────────────────────
+# ── plugin files ──────────────────────────────────────────────────────────────
+
 mkdir -p "${PLUGIN_DIR}/.codex-plugin"
-cp "${REPO_DIR}/.codex-plugin/plugin.json" "${PLUGIN_DIR}/.codex-plugin/plugin.json"
+cp "${PLUGIN_JSON}" "${PLUGIN_DIR}/.codex-plugin/plugin.json"
 echo "  ✓ .codex-plugin/plugin.json"
 
-# ── agents ───────────────────────────────────────────────────────────────────
 mkdir -p "${PLUGIN_DIR}/agents"
 for src in "${REPO_DIR}/agents"/*.md; do
     agent_name="$(basename "${src}")"
-    dest="${PLUGIN_DIR}/agents/${agent_name}"
-    normalize_agent "${src}" | safe_write "${dest}"
+    normalize_agent "${src}" | safe_write "${PLUGIN_DIR}/agents/${agent_name}"
     echo "  ✓ agents/${agent_name}"
 done
 
-# ── skills ───────────────────────────────────────────────────────────────────
 for skill_dir in "${REPO_DIR}/skills"/*/; do
     skill_name="$(basename "${skill_dir}")"
     dest_dir="${PLUGIN_DIR}/skills/${skill_name}"
     mkdir -p "${dest_dir}"
-
-    # Normalise SKILL.md; copy any other files as-is
     for f in "${skill_dir}"*; do
         fname="$(basename "${f}")"
         if [[ "${fname}" == "SKILL.md" ]]; then
@@ -78,6 +77,15 @@ for skill_dir in "${REPO_DIR}/skills"/*/; do
     done
     echo "  ✓ skills/${skill_name}/"
 done
+
+# ── config.toml registration ──────────────────────────────────────────────────
+
+if ! grep -q '\[plugins\."nf-core-module-dev@local"\]' "${CONFIG_FILE}" 2>/dev/null; then
+    printf '\n[plugins."nf-core-module-dev@local"]\nenabled = true\n' >> "${CONFIG_FILE}"
+    echo "  ✓ registered in ${CONFIG_FILE}"
+else
+    echo "  ✓ config.toml entry already present"
+fi
 
 echo
 echo "Done. Restart Codex to pick up the plugin."

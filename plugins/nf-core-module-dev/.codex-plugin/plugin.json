@@ -18,13 +18,20 @@
   ],
   "agents": "./agents/",
   "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "nf-core Module Dev",
     "shortDescription": "Create, test, and document nf-core Nextflow modules",
     "longDescription": "Three specialist agents (nf-module-dev, nf-test-expert, nf-secretary) that cover every file in an nf-core module: main.nf, environment.yml, nf-tests, snapshots, and meta.yml. Orchestrated end-to-end by the nf-module-manager skill.",
     "developerName": "Evangelos Karatzas",
     "category": "Bioinformatics",
-    "capabilities": ["Interactive", "Read", "Write"],
-    "defaultPrompt": ["Use the nf-module-manager skill to build or update nf-core modules end-to-end."]
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use the nf-module-manager skill to build or update nf-core modules end-to-end."
+    ]
   }
 }

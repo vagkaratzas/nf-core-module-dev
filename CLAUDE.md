@@ -36,7 +36,7 @@ nf-core-module-dev/
 ## Multi-platform support
 
 - **Claude Code** is the primary target: full plugin with agents, skills, and hooks.
-- **Codex** ships the three specialist agents as skills via `codex/install.sh` — the files under `agents/` are copied into `~/.codex/skills/<skill>/SKILL.md` with frontmatter normalized to `name` + `description` so Codex will load them. The `nf-module-manager` and `using-nf-core-module-dev` skills are **not** shipped on Codex (they rely on Claude Code's subagent dispatch, which Codex does not have).
+- **Codex** now has a repo-root manifest at `.codex-plugin/plugin.json` that points at the shared `agents/`, and `skills/` directories for store-based installation. The legacy `codex/install.sh` path remains as a fallback local install and still normalizes frontmatter for environments that need it.
 
 Agents must remain self-contained — no cross-agent calls in their content — so they work standalone on Codex.
 
@@ -84,4 +84,4 @@ scripts/bump-version.sh 1.1.0
 
 ## Hook
 
-`hooks/session-start` reads `skills/using-nf-core-module-dev/SKILL.md` and injects it into the session context via `hookSpecificOutput.additionalContext`. `hooks/run-hook.cmd` is a cross-platform wrapper (Unix + Windows).
+`hooks/session-start` reads `skills/using-nf-core-module-dev/SKILL.md` and injects it into the session context via `hookSpecificOutput.additionalContext`. `hooks/run-hook.cmd` is a cross-platform wrapper (Unix + Windows), and `hooks/hooks.json` now invokes it via a repo-relative path so the shared hook config is not tied to Claude-specific environment variables.
