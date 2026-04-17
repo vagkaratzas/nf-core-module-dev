@@ -7,6 +7,7 @@
 - `nf-test-expert`: prefer the smallest meaningful test file; sars-cov-2 data from the `modules` branch of nf-core/test-datasets is now the explicitly recommended first choice
 - `nf-module-dev`: added explicit container directive rules — look up the matching tag at `quay.io/repository/biocontainers/<package>?tab=tags` when the package is on Bioconda; in any other case leave placeholders and ask the user — never generate Wave containers
 - `nf-module-manager`: hardened the no-file-editing rule — the orchestrator is now explicitly forbidden from editing any file regardless of how trivial the change; all edits must be delegated to the appropriate agent
+- **Codex support**: added `codex/INSTALL.md` + `codex/install.sh` to expose the three specialist agents (`nf-module-dev`, `nf-test-expert`, `nf-secretary`) as Codex skills via the cross-CLI `~/.agents/skills/` discovery path. The `nf-module-manager` orchestrator stays Claude-Code-only (it depends on subagent dispatch, which Codex lacks) — Codex users invoke each specialist directly
 
 ## v1.0.0 — [2026/04/15] — Initial release
 

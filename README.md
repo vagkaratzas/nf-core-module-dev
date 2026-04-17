@@ -23,12 +23,26 @@ Because the `nf-module-manager` runs as a **skill** in your main session (not a 
 
 ## Installation
 
+### Claude Code
+
 ```bash
 claude plugin marketplace add vagkaratzas/nf-core-module-dev
 claude plugin install nf-core-module-dev@vagkaratzas
 ```
 
-Then start a new session. The plugin bootstraps automatically.
+Then start a new session. The plugin bootstraps automatically — you get the full experience: the three specialists plus the `nf-module-manager` orchestrator.
+
+### Codex
+
+```bash
+git clone https://github.com/vagkaratzas/nf-core-module-dev.git ~/.codex/nf-core-module-dev
+cd ~/.codex/nf-core-module-dev
+./codex/install.sh
+```
+
+Restart Codex to discover the skills. See [`codex/INSTALL.md`](codex/INSTALL.md) for details, Windows instructions, and uninstall. Re-run `install.sh` after `git pull` to update.
+
+> Codex only ships the three specialist skills (`nf-module-dev`, `nf-test-expert`, `nf-secretary`). The `nf-module-manager` orchestrator and the session bootstrap are Claude-Code-only because they rely on subagent dispatch. On Codex, invoke each specialist directly.
 
 ## Usage
 

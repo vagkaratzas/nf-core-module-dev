@@ -25,9 +25,20 @@ nf-core-module-dev/
 │   │   └── SKILL.md             ← end-to-end orchestration workflow
 │   └── using-nf-core-module-dev/
 │       └── SKILL.md             ← session-start bootstrap
-└── hooks/
-    └── hooks.json               ← injects bootstrap skill at session start
+├── hooks/
+│   └── hooks.json               ← injects bootstrap skill at session start
+└── codex/
+    ├── INSTALL.md               ← Codex install guide
+    ├── install.sh               ← writes normalized copies into ~/.codex/skills/<skill>/SKILL.md
+    └── uninstall.sh
 ```
+
+## Multi-platform support
+
+- **Claude Code** is the primary target: full plugin with agents, skills, and hooks.
+- **Codex** ships the three specialist agents as skills via `codex/install.sh` — the files under `agents/` are copied into `~/.codex/skills/<skill>/SKILL.md` with frontmatter normalized to `name` + `description` so Codex will load them. The `nf-module-manager` and `using-nf-core-module-dev` skills are **not** shipped on Codex (they rely on Claude Code's subagent dispatch, which Codex does not have).
+
+Agents must remain self-contained — no cross-agent calls in their content — so they work standalone on Codex.
 
 ## Agent and skill responsibilities
 
