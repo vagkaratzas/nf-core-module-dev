@@ -1,6 +1,6 @@
 # Release Notes
 
-## v1.1.0 — Unreleased
+## v1.1.0 — [2026/04/17]
 
 - `nf-test-expert`: clarified that `--profile` must use the `+` prefix (e.g. `+singularity`) to append the container profile on top of the base `test` profile, not replace it
 - `nf-test-expert`: agent now explicitly asks the user for `NXF_SINGULARITY_CACHEDIR` when using Singularity — no longer risks guessing a wrong default path
