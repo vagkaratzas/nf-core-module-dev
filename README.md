@@ -23,12 +23,26 @@ Because the `nf-module-manager` runs as a **skill** in your main session (not a 
 
 ## Installation
 
+### Claude Code
+
 ```bash
 claude plugin marketplace add vagkaratzas/nf-core-module-dev
 claude plugin install nf-core-module-dev@vagkaratzas
 ```
 
-Then start a new session. The plugin bootstraps automatically.
+Then start a new session. The plugin bootstraps automatically — you get the full experience: the three specialists plus the `nf-module-manager` orchestrator.
+
+### Codex
+
+Codex installation is installer-only (Linux/macOS; Windows requires WSL or Git Bash):
+
+```bash
+git clone https://github.com/vagkaratzas/nf-core-module-dev.git ~/.codex/nf-core-module-dev
+cd ~/.codex/nf-core-module-dev
+./codex/install.sh
+```
+
+Restart Codex (full quit). Re-run `./codex/install.sh` after `git pull` to update the installed plugin. See [`codex/INSTALL.md`](codex/INSTALL.md) for details and uninstall instructions.
 
 ## Usage
 
@@ -57,7 +71,7 @@ For targeted work, agents can be invoked directly:
 
 ## Requirements
 
-- [Claude Code](https://claude.ai/code)
+- [Claude Code](https://claude.ai/code) or Codex CLI
 - A local clone of [nf-core/modules](https://github.com/nf-core/modules)
 - `nf-core` CLI installed and on your PATH
 - `nf-test` installed and on your PATH
@@ -73,7 +87,7 @@ Agents carry their domain knowledge as embedded reference sections — no separa
 
 ## Releasing
 
-Version numbers are kept in sync across `plugin.json` and `marketplace.json` using the included bump script:
+Version numbers are kept in sync across the Claude plugin manifests and the Codex installer using the included bump script:
 
 ```bash
 # Check versions are in sync
@@ -81,6 +95,7 @@ scripts/bump-version.sh --check
 
 # Bump to a new version
 scripts/bump-version.sh 1.1.0
+```
 
 ## License
 
