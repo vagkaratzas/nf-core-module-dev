@@ -52,3 +52,9 @@ The install script overwrites the installed copy. Re-run it after `git pull`.
 ```bash
 ~/.codex/nf-core-module-dev/codex/uninstall.sh
 ```
+
+## Known limitations
+
+Currently, Codex subagents (tested model gpt-5.4) do not reliably follow instructions that require stopping to ask the user for input (e.g. confirming paths, choosing a profile, resolving ambiguity). Instead of pausing, they tend to proceed with their own assumptions and produce suboptimal or incorrect results.
+
+**Recommendation**: prefer Claude Code for end-to-end module work. Use the Codex install only when Claude Code is unavailable, and be prepared to review and correct agent outputs manually.
