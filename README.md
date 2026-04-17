@@ -40,9 +40,7 @@ cd ~/.codex/nf-core-module-dev
 ./codex/install.sh
 ```
 
-Restart Codex to discover the skills. See [`codex/INSTALL.md`](codex/INSTALL.md) for details, Windows instructions, and uninstall. Re-run `install.sh` after `git pull` to update.
-
-> Codex only ships the three specialist skills (`nf-module-dev`, `nf-test-expert`, `nf-secretary`). The `nf-module-manager` orchestrator and the session bootstrap are Claude-Code-only because they rely on subagent dispatch. On Codex, invoke each specialist directly.
+Restart Codex (full quit). The full plugin is available: all three specialist agents plus `nf-module-manager`. Re-run `install.sh` after `git pull` to update. See [`codex/INSTALL.md`](codex/INSTALL.md) for details and uninstall instructions.
 
 ## Usage
 

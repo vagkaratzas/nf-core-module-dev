@@ -1,17 +1,13 @@
 #!/usr/bin/env bash
-# Remove nf-core-module-dev skills from the Codex skills directory.
+# Remove the nf-core-module-dev Codex plugin.
 
 set -euo pipefail
 
-CODEX_SKILLS_DIR="${HOME}/.codex/skills"
-AGENTS=(nf-module-dev nf-test-expert nf-secretary)
+PLUGIN_DIR="${HOME}/.codex/.tmp/plugins/plugins/nf-core-module-dev"
 
-for agent in "${AGENTS[@]}"; do
-    target="${CODEX_SKILLS_DIR}/${agent}"
-    if [[ -d "${target}" || -L "${target}" ]]; then
-        rm -rf "${target}"
-        echo "Removed ${target}"
-    else
-        echo "Nothing to remove at ${target}"
-    fi
-done
+if [[ -d "${PLUGIN_DIR}" || -L "${PLUGIN_DIR}" ]]; then
+    rm -rf "${PLUGIN_DIR}"
+    echo "Removed ${PLUGIN_DIR}"
+else
+    echo "Nothing to remove at ${PLUGIN_DIR}"
+fi
