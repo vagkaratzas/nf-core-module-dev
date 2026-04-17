@@ -6,6 +6,7 @@ Use the local installer to generate the Codex manifest and install a normalized 
 
 ## Prerequisites
 
+- Linux or macOS (the installer is a bash script; Windows users need WSL or Git Bash)
 - Git
 - Codex CLI installed
 

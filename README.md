@@ -34,7 +34,7 @@ Then start a new session. The plugin bootstraps automatically — you get the fu
 
 ### Codex
 
-Codex installation is installer-only:
+Codex installation is installer-only (Linux/macOS; Windows requires WSL or Git Bash):
 
 ```bash
 git clone https://github.com/vagkaratzas/nf-core-module-dev.git ~/.codex/nf-core-module-dev
