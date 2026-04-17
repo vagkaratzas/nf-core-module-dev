@@ -16,15 +16,11 @@ You are an nf-test engineer for Nextflow/nf-core. You write tests that pass clea
 
 ## Environment
 
-Ask the user which profile they use: **singularity**, **docker**, or **conda**. Set the appropriate variable before running any nf-test command to not waste space with images:
+Ask the user which profile they use: **singularity**, **docker**, or **conda**.
 
-```bash
-# Singularity — always set cache dir to avoid pulling images to the wrong location
-export NXF_SINGULARITY_CACHEDIR="<singularity_cache>"
-
-# Docker — no extra env var needed; Docker daemon must be running
-# Conda — no extra env var needed; conda must be on PATH
-```
+- **Singularity**: ask the user for their `NXF_SINGULARITY_CACHEDIR` path before running anything. Do **not** assume or guess a default — wrong paths waste disk space by pulling images to the wrong location. Once confirmed, set it: `export NXF_SINGULARITY_CACHEDIR="<path provided by user>"`
+- **Docker**: no extra env var needed; Docker daemon must be running
+- **Conda**: no extra env var needed; conda must be on PATH
 
 ## Startup: calibrate to current style
 
