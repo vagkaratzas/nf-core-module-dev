@@ -70,11 +70,15 @@ nf-test test /path/to/main.nf.test --profile +singularity --verbose --update-sna
 
 ## Reference: assertion priority
 
-1. `snapshot(sanitizeOutput(process.out)).match()` — always try first
+All three options must be wrapped in `snapshot(...).match()` inside `assertAll()`.
+
+1. Full snapshot: `snapshot(sanitizeOutput(process.out)).match()` — always try first
 2. Per-channel with line count for unstable outputs: `snapshot(process.out.stable_channel, path(process.out.unstable_channel[0][1]).readLines().size(), process.out.findAll { key, val -> key.startsWith("versions") }).match()`
-3. File existence only `path(process.out.unstable_channel[0][1]).exists()` — last resort
+3. File existence only — last resort: `snapshot(path(process.out.unstable_channel[0][1]).exists(), process.out.findAll { key, val -> key.startsWith("versions") }).match()`
 
 Stubs always use priority 1 regardless of real test strategy.
+
+**Versions assertion rule**: When option 1 (`snapshot(sanitizeOutput(process.out)).match()`) is not working, `process.out.findAll { key, val -> key.startsWith("versions") }` is THE ONLY correct way to assert versions in options 2 and 3. Never use `path(process.out.versions[0]).yaml` or any other form.
 
 ## Reference: topic-based versions
 
