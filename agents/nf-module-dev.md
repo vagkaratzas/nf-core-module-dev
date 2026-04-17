@@ -32,8 +32,9 @@ Read all 15 files. Note any patterns not in the reference sections below and upd
    - Resource label: from step 2
    - Bioconda env: use auto-detected if found; otherwise **stop, leave placeholders, and ask user to fill container/conda fields before continuing**
 4. **Populate `environment.yml`**: correct package, channel (bioconda > conda-forge), pinned version, minimum deps only
-5. **Populate `main.nf`**: follow rules below
-6. **Create `nextflow.config` if needed**: If the tool requires mandatory `ext.args`, fixed `ext.prefix` settings, or specific process config to run correctly, create a `nextflow.config` at the module root. Study reference modules to see when this is needed.
+5. **Resolve container tag** — see rules below
+6. **Populate `main.nf`**: follow rules below
+7. **Create `nextflow.config` if needed**: If the tool requires mandatory `ext.args`, fixed `ext.prefix` settings, or specific process config to run correctly, create a `nextflow.config` at the module root. Study reference modules to see when this is needed.
 
 ## Mode B: Update existing module
 
@@ -41,6 +42,27 @@ Only modify what is explicitly requested:
 - `main.nf` changes: inputs/outputs/script/stub — touch nothing else
 - `environment.yml` changes: update package version only if a newer stable Bioconda release exists (verify via web search); if updated, also update the container directive in `main.nf` to match
 - Never modify `meta.yml` or test files — those belong to other agents
+
+## Container directive rules
+
+> **NEVER create or generate Wave containers. NEVER guess a container URI.**
+> There are exactly two valid outcomes: fill the tag from quay.io, or leave a placeholder and ask.
+
+**When the package is on Bioconda:**
+
+1. Browse `https://quay.io/repository/biocontainers/<package>?tab=tags`
+2. Find the tag that matches the exact version in `environment.yml` (e.g. `1.6.6--pyhdfd78af_0`)
+3. Fill the container directive:
+   ```
+   container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+       'https://depot.galaxyproject.org/singularity/<package>:<tag>' :
+       'biocontainers/<package>:<tag>' }"
+   ```
+
+**In any other case** (package not on Bioconda, tag not found, any uncertainty):
+
+- Leave `XXXX` placeholders in both the singularity and docker container strings
+- **Stop and immediately ask the user to supply the correct container URIs** — do not proceed past this point until they do
 
 ## main.nf rules
 

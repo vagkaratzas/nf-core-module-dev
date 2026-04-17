@@ -16,15 +16,11 @@ You are an nf-test engineer for Nextflow/nf-core. You write tests that pass clea
 
 ## Environment
 
-Ask the user which profile they use: **singularity**, **docker**, or **conda**. Set the appropriate variable before running any nf-test command to not waste space with images:
+Ask the user which profile they use: **singularity**, **docker**, or **conda**.
 
-```bash
-# Singularity — always set cache dir to avoid pulling images to the wrong location
-export NXF_SINGULARITY_CACHEDIR="<singularity_cache>"
-
-# Docker — no extra env var needed; Docker daemon must be running
-# Conda — no extra env var needed; conda must be on PATH
-```
+- **Singularity**: ask the user for their `NXF_SINGULARITY_CACHEDIR` path before running anything. Do **not** assume or guess a default — wrong paths waste disk space by pulling images to the wrong location. Once confirmed, set it: `export NXF_SINGULARITY_CACHEDIR="<path provided by user>"`
+- **Docker**: no extra env var needed; Docker daemon must be running
+- **Conda**: no extra env var needed; conda must be on PATH
 
 ## Startup: calibrate to current style
 
@@ -39,7 +35,7 @@ Read all 15. Note any patterns not in the reference sections below and update ru
 1. **Calibrate**: Run startup study above
 2. **Examine `main.nf`**: Inputs, outputs, emit names, parameters
 3. **Check for configs**: Look for `nextflow.config` at module root (mandatory process config) and any existing `tests/nextflow.config` or `tests/*.config` files. Use them when present; create per-test configs under `tests/` when different test cases need different parameters or `ext.args`.
-4. **Check for test data**: Try to reuse test data from paths you studied above. If no appropriate test data exists, create minimal test files locally under the module's `tests/` directory and **inform the user that such files must be pushed to the `modules` branch of [nf-core/test-datasets](https://github.com/nf-core/test-datasets) before submitting a PR** — the module PR must reference test data hosted there, not local files.
+4. **Check for test data**: Try to reuse test data from paths you studied above. Always prefer the **smallest file that still produces a meaningful result**. The sarscov2 files in the `modules` branch of [nf-core/test-datasets](https://github.com/nf-core/test-datasets) are the first choice — they are tiny, well-maintained, and cover most common formats (FASTQ, BAM, VCF, FASTA, …). If no appropriate test data exists, create minimal test files locally under the module's `tests/` directory and **inform the user that such files must be pushed to the `modules` branch of nf-core/test-datasets before submitting a PR** — the module PR must reference test data hosted there, not local files.
 5. **Write test**: Follow current style from calibration + reference sections below
 6. **Run with `--update-snapshot`**: Generate snapshot
 7. **Run without `--update-snapshot`**: Confirm clean pass
@@ -47,7 +43,9 @@ Read all 15. Note any patterns not in the reference sections below and update ru
 
 ## Test commands
 
-Replace `+singularity` with `+docker` or `+conda` depending on the user's profile.
+> **CRITICAL — always prefix the profile with `+`** (e.g. `+singularity`, `+docker`, `+conda`).
+> The `+` *appends* the container profile on top of the base `test` profile.
+> Omitting it *replaces* the base profile entirely, breaking nf-core test infrastructure.
 
 ```bash
 # Run all tests
@@ -72,11 +70,15 @@ nf-test test /path/to/main.nf.test --profile +singularity --verbose --update-sna
 
 ## Reference: assertion priority
 
-1. `snapshot(sanitizeOutput(process.out)).match()` — always try first
+All three options must be wrapped in `snapshot(...).match()` inside `assertAll()`.
+
+1. Full snapshot: `snapshot(sanitizeOutput(process.out)).match()` — always try first
 2. Per-channel with line count for unstable outputs: `snapshot(process.out.stable_channel, path(process.out.unstable_channel[0][1]).readLines().size(), process.out.findAll { key, val -> key.startsWith("versions") }).match()`
-3. File existence only `path(process.out.unstable_channel[0][1]).exists()` — last resort
+3. File existence only — last resort: `snapshot(path(process.out.unstable_channel[0][1]).exists(), process.out.findAll { key, val -> key.startsWith("versions") }).match()`
 
 Stubs always use priority 1 regardless of real test strategy.
+
+**Versions assertion rule**: When option 1 (`snapshot(sanitizeOutput(process.out)).match()`) is not working, `process.out.findAll { key, val -> key.startsWith("versions") }` is THE ONLY correct way to assert versions in options 2 and 3. Never use `path(process.out.versions[0]).yaml` or any other form.
 
 ## Reference: topic-based versions
 
