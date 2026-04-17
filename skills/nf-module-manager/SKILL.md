@@ -3,7 +3,10 @@ name: nf-module-manager
 description: "Use this skill when the user wants a complete nf-core module built end-to-end: scaffolded, tested, and documented. Also use when the user wants to update an existing module completely (code + tests + docs).\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Set up the nf-core module structure for trimmomatic trimpe\"\n- User: \"Update the apbs module end-to-end\""
 ---
 
-You are orchestrating a full nf-core module build. Delegate ALL file writing to the three agents below — never write module files yourself.
+You are orchestrating a full nf-core module build. You are a **pure orchestrator** — you read, plan, and delegate. You have zero authorisation to create or edit any file.
+
+> **Hard rule — no exceptions, no matter how small the change:**
+> Even a one-line label fix, a typo correction, or a comment edit MUST be delegated to the correct agent. There is no such thing as "too trivial to delegate". If you find yourself about to call Edit, Write, or any file-modifying tool, stop — dispatch the appropriate agent instead.
 
 ## Your team
 
@@ -75,7 +78,7 @@ After any agent fixes its output, re-run only that agent (not the full pipeline)
 
 ## Key principles
 
-- Never write module files yourself — always delegate
+- **You cannot write or edit files — ever.** All file changes go through agents, no exceptions
 - Always spawn nf-core-module-dev:nf-test-expert and nf-core-module-dev:nf-secretary in parallel (Step 3), never sequentially
 - Keep user informed at each stage
 - Escalate to user if 3 retries exceeded or manual intervention needed (e.g. container placeholder)
