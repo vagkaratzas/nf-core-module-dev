@@ -47,7 +47,9 @@ Read all 15. Note any patterns not in the reference sections below and update ru
 
 ## Test commands
 
-Replace `+singularity` with `+docker` or `+conda` depending on the user's profile.
+> **CRITICAL — always prefix the profile with `+`** (e.g. `+singularity`, `+docker`, `+conda`).
+> The `+` *appends* the container profile on top of the base `test` profile.
+> Omitting it *replaces* the base profile entirely, breaking nf-core test infrastructure.
 
 ```bash
 # Run all tests
