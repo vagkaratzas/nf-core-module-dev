@@ -11,9 +11,8 @@ The **nf-core-module-dev** plugin — agents and skills for creating, testing, a
 ```
 agents/          ← three specialist agents (source of truth for both platforms)
 skills/          ← nf-module-manager orchestrator + session bootstrap
-codex/           ← install.sh / uninstall.sh for Codex plugin installation
+codex/           ← install.sh / uninstall.sh for Codex local installation
 .claude-plugin/  ← Claude Code plugin manifest
-.codex-plugin/   ← Codex plugin manifest
 ```
 
 ## Agent responsibilities
@@ -32,9 +31,7 @@ codex/           ← install.sh / uninstall.sh for Codex plugin installation
 
 ## Installing for Codex
 
-Codex support now lives in `.codex-plugin/plugin.json` and points at the shared repo-root `agents/`, `skills/`, and `hooks/` directories, so plugin stores should target the repository root directly.
-
-For environments that still need a local copy install, `./codex/install.sh` remains available as a fallback. Re-run it after `git pull`. See `codex/INSTALL.md` for full details.
+Codex support is installer-only. Run `./codex/install.sh` from a local clone, then restart Codex. Re-run the installer after `git pull`. See `codex/INSTALL.md` for full details.
 
 ## Adding knowledge
 

@@ -29,14 +29,14 @@ nf-core-module-dev/
 │   └── hooks.json               ← injects bootstrap skill at session start
 └── codex/
     ├── INSTALL.md               ← Codex install guide
-    ├── install.sh               ← writes normalized copies into ~/.codex/skills/<skill>/SKILL.md
+    ├── install.sh               ← generates the Codex manifest and installs a normalized local copy
     └── uninstall.sh
 ```
 
 ## Multi-platform support
 
-- **Claude Code** is the primary target: full plugin with agents, skills, and hooks.
-- **Codex** now has a repo-root manifest at `.codex-plugin/plugin.json` that points at the shared `agents/`, and `skills/` directories for store-based installation. The legacy `codex/install.sh` path remains as a fallback local install and still normalizes frontmatter for environments that need it.
+- **Claude Code** is the primary target: full plugin with agents, skills, and hooks through the Claude marketplace.
+- **Codex** is installer-only: `codex/install.sh` generates the installed `.codex-plugin/plugin.json` and copies normalized agents and skills into Codex's local plugin cache.
 
 Agents must remain self-contained — no cross-agent calls in their content — so they work standalone on Codex.
 
@@ -72,7 +72,7 @@ Agent files use `<modules_repo>` and `<singularity_cache>` as placeholders for p
 
 ## Plugin manifest
 
-`.claude-plugin/plugin.json` follows the Claude Code plugin schema. Both `plugin.json` and `marketplace.json` must stay in sync — use the bump script:
+`.claude-plugin/plugin.json` follows the Claude Code plugin schema. Both Claude `plugin.json` and `marketplace.json` must stay in sync — use the bump script:
 
 ```bash
 # Check current versions are in sync
