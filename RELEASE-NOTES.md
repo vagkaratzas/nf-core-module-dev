@@ -21,6 +21,14 @@
 - `nf-test-expert`: explicit "stub test is mandatory" rule — every module needs at least one `options "-stub"` test as the minimum CI safety net
 - `nf-test-expert`: documented `.github/skip_nf_test.json` (alphabetical) for legitimately unsupported profiles
 - `nf-test-expert`: clarified that upstream-dependency tags (`mmseqs`, `mmseqs/createdb` etc. for setup-block runs) are mandatory because they cause upstream changes to re-trigger this module's CI
+- `nf-secretary`: workflow now runs `nextflow lint <main.nf>` (strict Nextflow grammar check) before `nf-core modules lint` to catch syntax issues early
+- `nf-secretary`: EDAM lookup procedure added — agent must check the built-in table, then grep existing repo `meta.yml` files, then search the EDAM ontology directly, before settling for `ontologies: []`
+- `nf-secretary`: EDAM coverage rule made explicit — every file entry, input AND output, gets ontologies populated; no skipping after the first one
+- `nf-secretary`: reconciled prior guidance about `--fix`-inserted `ontologies: []` — the agent now treats each as a TODO and runs the lookup procedure before leaving it empty
+- `nf-secretary`: added `tools` block requirements — every invoked tool listed individually, with `args_id` matching the `$args` / `$args2` / `$args3` numbering from `main.nf`
+- `nf-secretary`: keywords rule strengthened — must cover research domain / data type / function and MUST NOT be solely the (sub)tool name; multi-tool modules add the `multi-tool` keyword plus each component
+- `nf-secretary`: input-block rules expanded — tuple inputs split into separate entries, every meta map (`meta`, `meta2`, …) documented individually, each input marked Mandatory or Optional in its description, file `pattern` is Java glob syntax
+- `nf-secretary`: documented the `type:` whitelist (`map`, `file`, `directory`, `string`, `boolean`, `integer`, `float`, `list`) — anything else fails schema validation
 
 ## v1.1.0 — [2026/04/17]
 
