@@ -1,6 +1,6 @@
 # Release Notes
 
-## v1.2.0dev — unreleased
+## v1.2.0 — [2026/05/01]
 
 - `nf-module-dev`: research step now requires cross-checking official docs **and** the command's `--help` output, with explicit instruction to write down every mandatory + optional input file, every flag, and every possible output (no silent omissions)
 - `nf-module-dev`: prefer a single input tuple (`tuple val(meta), path(reads), path(reference), ...`) over multiple separate channels — split only when inputs have genuinely different cardinalities
