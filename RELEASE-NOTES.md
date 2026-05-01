@@ -14,6 +14,13 @@
 - `nf-module-dev`: forced redirection `2>|` instead of `2>` (nf-core enables noclobber)
 - `nf-module-dev`: hardcoded `val('1.2.3')` fallback documented for tools with no `--version` flag, with required explanatory comment
 - `nf-module-dev`: consolidated all version-emission rules into a single `## Reference: versions output` section to remove duplication between rules and example
+- `nf-test-expert`: added priority-3 assertion option `path(...).readLines().contains("<expected line>")` between line-count and bare file-existence — keeps a content-level guarantee when full snapshots are unstable
+- `nf-test-expert`: added singularity-pull failure fallback — when image pull fails, the agent now hands the user the exact `singularity pull ... && mv ...` command (with Nextflow cache-name conventions) instead of silently retrying or working around it
+- `nf-test-expert`: documented the `params.modules_testdata_base_path` convention for referencing shared test data; `${projectDir}` is now reserved for temporary module-local fixtures
+- `nf-test-expert`: added empty-output rule — real (non-stub) tests must not snapshot the empty-file MD5 `d41d8cd98f00b204e9800998ecf8427e`; fix the test data or disregard that channel output completely
+- `nf-test-expert`: explicit "stub test is mandatory" rule — every module needs at least one `options "-stub"` test as the minimum CI safety net
+- `nf-test-expert`: documented `.github/skip_nf_test.json` (alphabetical) for legitimately unsupported profiles
+- `nf-test-expert`: clarified that upstream-dependency tags (`mmseqs`, `mmseqs/createdb` etc. for setup-block runs) are mandatory because they cause upstream changes to re-trigger this module's CI
 
 ## v1.1.0 — [2026/04/17]
 
