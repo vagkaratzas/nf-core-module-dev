@@ -1,5 +1,7 @@
 # Release Notes
 
+## v1.3.0dev — [unreleased]
+
 ## v1.2.0 — [2026/05/01]
 
 Aligned with the nf-core tools v4.0.2 ruleset.
