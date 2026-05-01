@@ -29,17 +29,9 @@ Read all 15. Note any structural patterns that differ from the reference section
 2. **Analyze `main.nf`**: Map every input/output channel — names, types, tuple structure, emit names
 3. **Research tool**: Homepage, docs, DOI, licence (web search if needed)
 4. **Write/update `meta.yml`**: Follow reference conventions exactly
-5. **Lint**: Fix all errors. Warnings are acceptable — report them with explanation.
-6. **Report**: Changes made, tool info sourced, lint result, any assumptions
-
-## Hard rules (prevent lint errors)
-
-- `doi: ""` → omit entirely; `identifier: ""` → valid, if tool not on biotools
-- Eval keys with `\$` or single-quotes → must be UNQUOTED in YAML (double-quoting crashes parser)
-- Output key must match what the script actually produces (e.g. `${prefix}.log` not `*.log`)
-- `nf-core modules lint --fix` may leave empty `{}` bodies — always fill them with `type`, `description`, `pattern`, `ontologies`
-- Optional outputs: document normally, add "Optional." to description
-- `test_snapshot_exists` failure → test infrastructure issue, not meta.yml
+5. **Syntax check `main.nf`**: Run `nextflow lint <modules_repo>/modules/nf-core/<tool>/main.nf` — strict Nextflow grammar check, separate from `nf-core modules lint`. Fix any reported syntax issues before continuing (these usually originate from the module-dev agent but block downstream tooling).
+6. **Lint**: `nf-core modules lint <tool/subcommand>` — fix all errors. Warnings are acceptable — report them with explanation. If you ran `--fix`, sweep the file for any empty `{}` bodies it left behind and fill them with the full `type` / `description` / `pattern` / `ontologies` set; the auto-fixer often inserts skeletons it does not complete.
+7. **Report**: Changes made, tool info sourced, lint result, any assumptions
 
 ---
 
@@ -49,15 +41,22 @@ Read all 15. Note any structural patterns that differ from the reference section
 - No `# yaml-language-server` header line
 - `name`: underscore for subcommands (e.g. `pygenprop_info`, not `pygenprop/info`)
 - `description`: use `|` block scalar for multi-line; single line OK for short descriptions
-- `keywords`: list of lowercase strings
+- `keywords`: list of lowercase strings; MUST cover research domain, data types, and tool function — MUST NOT be solely the (sub)tool name. For multi-tool modules, include the literal `multi-tool` keyword plus each component tool's name.
 - `licence`: block form preferred (`- "MIT"`)
 - `identifier`: `""`, if tool not on biotools, never omit
 - `doi`: OMIT entirely if no DOI — do NOT set to `""` or `null`
 
+### `tools` block
+- MUST list every tool the module invokes, even if they share a single bioconda package.
+- Each tool entry MUST set `args_id` to the matching `$args` variable from `main.nf` — `$args` for the first piped/invoked tool, `$args2` for the second, `$args3` for the third, etc. (numbering follows pipe position, matching the rule in `nf-module-dev`).
+
 ### Input block
 - List of lists: each channel is `- - element1:\n      ...\n    element2:\n      ...`
-- `meta` map entry: `type: map`, description `Groovy Map containing sample information\ne.g. \`[ id:'sample1' ]\``
-- File entries: always include `pattern` and `ontologies`; `ontologies: []` is valid
+- Tuple inputs MUST be split into separate entries — `meta`, then each `path(...)` separately. Never combine multiple tuple elements into one entry.
+- Each meta map (`meta`, `meta2`, `meta3`, …) MUST have its own documented entry: `type: map`, description `Groovy Map containing sample information\ne.g. \`[ id:'sample1' ]\``.
+- Mark each input entry as **Mandatory** or **Optional** in its `description` text — there is no separate schema field for this.
+- File entries: always include `pattern` (Java glob syntax) and `ontologies` (see EDAM coverage rule below).
+- `type:` values are restricted to: `map`, `file`, `directory`, `string`, `boolean`, `integer`, `float`, `list`. Anything else fails schema validation.
 
 ### Output block
 MUST be a YAML mapping (object), NOT a list. Using list syntax (`- clipkit:`) triggers schema error "Incorrect type. Expected 'object(Meta yaml)'".
@@ -80,7 +79,7 @@ output:
 
 - `val` (non-tuple) input channels: bare mapping entry (no outer `-`): `- out_format:\n    type: string`
 - Always document ALL emit channels including version channels
-- `ontologies: []` is added automatically by `--fix` for file entries without EDAM terms; keep them
+- `ontologies: []` is added automatically by `--fix` for file entries without EDAM terms — treat each as a TODO and run the EDAM lookup procedure (below) before leaving it empty
 - `versions.yml` gets `ontologies:\n  - edam: http://edamontology.org/format_3750`
 
 ### Eval key quoting
@@ -140,6 +139,18 @@ Documented identically to regular outputs — just add "Optional." to the descri
 
 Always keep the format name as a comment after the EDAM URL.
 
+**Coverage rule — every file entry, every input AND output, gets ontologies populated.** Do not write `ontologies: []` on the first file and then skip the rest, and do not assume only the primary output needs terms. The linter accepts `[]` only as a last resort.
+
+**Lookup procedure — exhaust these before settling for `ontologies: []`:**
+
+1. Check the table below for the format.
+2. If absent, grep recently modified `meta.yml` files in the modules repo for the same file extension or format name — many EDAM terms have already been chosen by other modules and are reused project-wide:
+   ```bash
+   grep -r -B2 -A1 "format_" <modules_repo>/modules/nf-core/*/meta.yml | grep -i "<extension or format keyword>"
+   ```
+3. If still absent, search the EDAM ontology directly (https://edamontology.github.io/edam-browser/ or EBI Ontology Lookup Service) for the format name.
+4. Only after steps 1–3 fail, fall back to `ontologies: []` — and report it in the handoff so a human can confirm.
+
 | Format | EDAM URI |
 |--------|----------|
 | FASTA | `http://edamontology.org/format_1929` |
@@ -160,10 +171,13 @@ Always keep the format name as a comment after the EDAM URL.
 
 ---
 
-## Reference: common lint warnings (not errors)
+## Reference: lint findings NOT caused by meta.yml
 
-- `container_links`: HTTP 404 when linter resolves Seqera Wave container URL — transient registry issue, not a meta.yml problem
-- `main_nf_container: Container versions do not match` — follows from the 404 above; not a meta.yml issue
+Do not chase these inside `meta.yml` — they originate elsewhere:
+
+- `container_links`: HTTP 404 when linter resolves Seqera Wave container URL — transient registry issue.
+- `main_nf_container: Container versions do not match` — follows from the 404 above.
+- `test_snapshot_exists` failure — test infrastructure issue (snapshot file missing/stale); belongs to `nf-test-expert`.
 
 ---
 

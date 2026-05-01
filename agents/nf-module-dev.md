@@ -21,7 +21,7 @@ Read all 15 files. Note any patterns not in the reference sections below and upd
 
 ## Mode A: Create new module
 
-1. **Research tool**: Web search for official docs — required inputs, optional inputs, mandatory flags, optional flags, output files, Bioconda package name + latest stable version
+1. **Research tool**: Cross-check official docs **and** the command's `--help` output (run it locally if a container is already pulled). Write down **every** mandatory + optional input file, mandatory + optional flag, and **every** output file the tool can produce — the agent will only expose what it documents here. Also capture: Bioconda package name + latest stable version, and the exact command to print the version string.
 2. **Determine resource label**: `process_single` → `process_low` → `process_medium` → `process_high` → `process_high_memory` / `process_long` based on known tool requirements
 3. **Scaffold**:
    ```bash
@@ -66,15 +66,28 @@ Only modify what is explicitly requested:
 
 ## main.nf rules
 
-- All file inputs (mandatory + optional) in input channel; optional flags → `ext.args` only
-- `def args = task.ext.args ?: ''`
-- `def prefix = task.ext.prefix ?: "${meta.id}"`
-- `meta.single_end` handling where applicable
-- Named output channels for all meaningful outputs + always emit `versions` and the respective topic channels
-- Output paths: use `path("${prefix}.ext")` whenever the tool names its output after the input (the common case). Only fall back to a glob `path("*.ext")` when the output filename genuinely cannot be predicted from the prefix (e.g. the tool appends an unpredictable suffix). Using a glob when `${prefix}` would work is incorrect — it breaks the linter's `correct_meta_outputs` check and produces non-deterministic staging.
-- Stub block with `touch` for every output
-- No hardcoded params — use `$task.cpus`, `ext.args`, `ext.args2` etc.
-- Capture software version at runtime
+- **Inputs**:
+  - All file inputs (mandatory + optional) belong in the input channel — never via `ext.args`. Document every optional input you found during research; do not silently drop any.
+  - **Prefer a single tuple for all inputs where possible**: `tuple val(meta), path(reads), path(reference), path(index)` is preferred over multiple separate channels. Only split into additional channels when inputs have genuinely different cardinalities (e.g. a per-sample input vs. a single shared reference used across all samples).
+  - For multiple meta maps use `meta`, `meta2`, `meta3` (numbered).
+  - Only two standard meta keys are accepted: `meta.id` and `meta.single_end`. Do not hardcode custom meta fields as expected inputs — pass extras via `ext.args`.
+- **Args / config**:
+  - Optional flags → `ext.args` only (never new module inputs).
+  - `def args = task.ext.args ?: ''`; multiple piped tools use `args2`, `args3` numbered by pipe position.
+  - `def prefix = task.ext.prefix ?: "${meta.id}"`.
+  - **Never modify the `when:` block** in the process definition — conditional execution belongs in `process.ext.when` in pipeline config.
+- **Outputs**:
+  - Document every optional output the tool can produce; expose each as a named emit (see Reference: main.nf style patterns for the `optional: true` syntax).
+  - Named output channels for all meaningful outputs + always emit a `versions` topic channel — see Reference: versions output for the canonical pattern and rules.
+  - Output paths: use `path("${prefix}.ext")` whenever the tool names its output after the input (the common case). Only fall back to a glob `path("*.ext")` when the output filename genuinely cannot be predicted from the prefix (e.g. the tool appends an unpredictable suffix). Using a glob when `${prefix}` would work is incorrect — it breaks the linter's `correct_meta_outputs` check and produces non-deterministic staging.
+  - Prefer compressed formats: `*.fastq.gz` over `*.fastq`, `*.bam` over `*.sam`. Use UNIX pipes to avoid intermediate writes: `gzip -cdf $input | tool | gzip > $output`.
+- **Script body**:
+  - No hardcoded params — use `$task.cpus`, `ext.args`, `ext.args2` etc.
+  - Use forced redirection `2>|` instead of `2>` (nf-core enables noclobber).
+  - Inline scripts up to ~20 lines are fine; anything longer belongs in `templates/<module>.<ext>` and the script block becomes `template '<module>.<ext>'`.
+- **Stub block**:
+  - Mirror the script's `prefix` / output variable declarations and `touch` (or equivalent) every declared output, including optional ones — the linter checks output coverage.
+  - For gzipped outputs, do NOT `touch foo.txt.gz` (parsers will fail on the empty file). Use `echo "" | gzip > "${prefix}.txt.gz"` instead.
 
 ## Handoff note
 
@@ -95,11 +108,24 @@ When done, report to caller (user or nf-module-manager):
 - Stub block: `echo "$args"` before `touch` commands when args are declared
 - Optional file inputs: `path optional_file` in input channel; `def flag = optional_file ? "-x ${optional_file}" : ''`
 - Optional outputs: `, emit: name, optional: true` syntax
-- Versions output (current standard): eval tuple — NO `cat <<-END_VERSIONS` heredoc:
+
+## Reference: versions output
+
+Current standard is the `eval` tuple — NO `cat <<-END_VERSIONS` heredoc:
+
+```nextflow
+tuple val("${task.process}"), val('toolname'), eval("tool --version 2>&1 | sed 's/tool //; s/^v//'"), topic: versions, emit: versions_toolname
+```
+
+Rules:
+- `topic: versions` — NO quotes around `versions` (unlike the string `'versions'` in the old path-based approach).
+- The emitted version string MUST be bare numeric (`1.0.0`) — no `v` prefix, no tool name, no commit hash suffix. Strip any prefix with `sed`/`awk` inside the `eval`.
+- Each tool in a multi-tool module needs its own `versions_<tool>` emit channel.
+- For tools with no CLI version flag, hardcode and comment why:
   ```nextflow
-  tuple val("${task.process}"), val('toolname'), eval("tool --version 2>&1 | sed 's/tool //'"), topic: versions, emit: versions_toolname
+  // hardcoded: tool has no --version flag
+  tuple val("${task.process}"), val('toolname'), val('1.2.3'), topic: versions, emit: versions_toolname
   ```
-  Note: `topic: versions` — NO quotes around `versions` (unlike the string `'versions'` in the old path-based approach)
 
 ## Reference: resource labels
 
