@@ -25,15 +25,15 @@ Codex fallback: some Codex surfaces expose only generic subagent roles (for exam
 1. Do **not** continue by editing files in the main session. The main session remains an orchestrator only.
 2. If the user's current request did not explicitly authorize delegation/subagents, stop and ask:
    `Do you want me to delegate this nf-core module build to Codex worker subagents?`
-3. After explicit authorization, spawn generic worker subagents with disjoint ownership:
+3. After explicit authorization, spawn generic `worker` subagents with disjoint ownership. Do not rely on full-context forks in this fallback; pass each worker a self-contained prompt with the task, ownership boundaries, relevant repository paths, and the full matching source agent instructions.
    - worker for `nf-module-dev`: owns only `main.nf`, `environment.yml`, and module-level `nextflow.config` if needed
    - worker for `nf-test-expert`: owns only `tests/main.nf.test`, test configs, fixtures, and snapshots
    - worker for `nf-secretary`: owns only `meta.yml`
-4. Give each worker the matching source agent file as its operating instructions:
+4. Before spawning, read the matching source agent file and include its content in the worker prompt as operating instructions:
    - `agents/nf-module-dev.md`
    - `agents/nf-test-expert.md`
    - `agents/nf-secretary.md`
-5. Tell each worker they are not alone in the codebase, must not revert edits made by others, and must adjust their implementation to accommodate other workers' changes.
+5. Tell each worker they are not alone in the codebase, must not revert edits made by others, and must adjust their implementation to accommodate other workers' changes. Require each worker to list the files it changed in its final answer.
 6. Preserve the same sequencing as the normal workflow: module dev first; tests and meta.yml in parallel; lint after the snapshot exists.
 
 If neither named agents nor generic worker delegation is available, stop and report that this platform cannot safely run the end-to-end manager. Do not silently switch to doing all file edits locally.
