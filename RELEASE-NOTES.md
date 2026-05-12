@@ -10,6 +10,7 @@
 - updated `codex/install.sh` to copy the committed Codex manifest and no-op hook while still normalizing agent and skill frontmatter for local development installs
 - updated install docs to prefer `codex plugin marketplace add vagkaratzas/nf-core-module-dev` plus `/plugins`, with `codex/install.sh` documented as a local development helper
 - added `.codex-plugin/plugin.json` to the version bump configuration so Claude and Codex manifests stay in sync
+- added a Codex fallback path to `nf-module-manager`: when named plugin agents are unavailable, it must ask for explicit generic-worker delegation and reuse the source agent files as worker instructions instead of editing files in the main session
 
 ## v1.2.0 — [2026/05/01]
 
