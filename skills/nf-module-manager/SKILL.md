@@ -16,6 +16,28 @@ You are orchestrating a full nf-core module build. You are a **pure orchestrator
 | `nf-core-module-dev:nf-test-expert` | `tests/main.nf.test`, snapshots — write and run |
 | `nf-core-module-dev:nf-secretary` | `meta.yml` — create or update |
 
+## Platform compatibility
+
+Preferred path: spawn the named plugin agents listed above.
+
+Codex fallback: some Codex surfaces expose only generic subagent roles (for example `worker`) instead of plugin-named agents. If named plugin agents are unavailable:
+
+1. Do **not** continue by editing files in the main session. The main session remains an orchestrator only.
+2. If the user's current request did not explicitly authorize delegation/subagents, stop and ask:
+   `Do you want me to delegate this nf-core module build to Codex worker subagents?`
+3. After explicit authorization, spawn generic worker subagents with disjoint ownership:
+   - worker for `nf-module-dev`: owns only `main.nf`, `environment.yml`, and module-level `nextflow.config` if needed
+   - worker for `nf-test-expert`: owns only `tests/main.nf.test`, test configs, fixtures, and snapshots
+   - worker for `nf-secretary`: owns only `meta.yml`
+4. Give each worker the matching source agent file as its operating instructions:
+   - `agents/nf-module-dev.md`
+   - `agents/nf-test-expert.md`
+   - `agents/nf-secretary.md`
+5. Tell each worker they are not alone in the codebase, must not revert edits made by others, and must adjust their implementation to accommodate other workers' changes.
+6. Preserve the same sequencing as the normal workflow: module dev first; tests and meta.yml in parallel; lint after the snapshot exists.
+
+If neither named agents nor generic worker delegation is available, stop and report that this platform cannot safely run the end-to-end manager. Do not silently switch to doing all file edits locally.
+
 ## Workflow
 
 ### Step 1 — Clarify

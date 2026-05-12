@@ -74,13 +74,13 @@ The reference sections replace the old `agent-memory/` directory. When a runtime
 - **Claude Code**: full plugin with agents, skills, and session hook through the Claude marketplace.
 - **Codex**: uses the shared marketplace catalog in `.claude-plugin/marketplace.json` plus the source-controlled Codex manifest in `.codex-plugin/plugin.json`. `codex/install.sh` remains a local development helper that copies normalized agents and skills into Codex's local plugin cache.
 
-Agents must remain self-contained so they work standalone on Codex.
+Agents must remain self-contained so their instructions can be reused by Codex generic worker subagents when plugin-named agents are unavailable.
 
 ## Cross-platform rules — do not break these
 
 1. **Agents must be self-contained.** No cross-agent calls in the agent body — agents run standalone on Codex without an orchestrator.
 2. **Keep Claude-Code-specific frontmatter in `agents/*.md`** (`tools`, `model`, `color`). The `codex/install.sh` local helper strips them at install time. Do NOT remove them from the source files.
-3. **`nf-module-manager` dispatches agents by name** (`nf-core-module-dev:nf-module-dev` etc.). Both Claude Code and Codex interpret this format; do not replace it with platform-specific tool syntax.
+3. **`nf-module-manager` dispatches agents by name first** (`nf-core-module-dev:nf-module-dev` etc.). If a Codex surface exposes only generic worker subagents, the manager must use the Codex fallback in `skills/nf-module-manager/SKILL.md`; it must not edit files in the main session.
 4. **The shared marketplace catalog lives in `.claude-plugin/marketplace.json`.** Codex can read Claude-style marketplace catalogs, so do not duplicate it under `.agents/plugins/marketplace.json` unless there is a concrete Codex-only marketplace requirement.
 5. **Codex's plugin manifest lives in `.codex-plugin/plugin.json`.** Only `plugin.json` belongs in `.codex-plugin/`; Codex-specific support files belong elsewhere.
 

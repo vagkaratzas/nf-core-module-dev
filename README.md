@@ -45,6 +45,38 @@ codex
 
 Restart Codex after installation. See [`codex/INSTALL.md`](codex/INSTALL.md) for local development installs and uninstall notes.
 
+## Updating
+
+### Claude Code
+
+```bash
+claude plugin marketplace update vagkaratzas
+claude plugin update nf-core-module-dev@vagkaratzas
+```
+
+Then restart Claude Code.
+
+If the configured marketplace or plugin name differs:
+
+```bash
+claude plugin marketplace list
+claude plugin list
+```
+
+### Codex
+
+```bash
+codex plugin marketplace upgrade vagkaratzas
+```
+
+Then restart Codex and update or reinstall `nf-core-module-dev` from `/plugins`.
+
+If the configured marketplace name differs:
+
+```bash
+codex plugin marketplace list
+```
+
 ## Usage
 
 For a complete end-to-end module build, just describe what you want:

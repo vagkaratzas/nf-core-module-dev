@@ -48,9 +48,9 @@ Restart Codex after running the helper. Re-run it after `git pull` to refresh th
 
 | Component | Available on Codex |
 |-----------|-------------------|
-| `nf-module-dev` agent | yes, when the Codex surface supports plugin agents |
-| `nf-test-expert` agent | yes, when the Codex surface supports plugin agents |
-| `nf-secretary` agent | yes, when the Codex surface supports plugin agents |
+| `nf-module-dev` agent | via named plugin agent when supported; otherwise via generic worker fallback |
+| `nf-test-expert` agent | via named plugin agent when supported; otherwise via generic worker fallback |
+| `nf-secretary` agent | via named plugin agent when supported; otherwise via generic worker fallback |
 | `nf-module-manager` skill | yes |
 | `using-nf-core-module-dev` bootstrap | yes |
 
@@ -80,7 +80,7 @@ For marketplace installs, uninstall from the Codex `/plugins` browser.
 
 ## Known Limitations
 
-Codex subagent and plugin-agent support has changed across recent releases. If Codex does not expose the three specialist agents directly, use the bundled `nf-module-manager` skill as the entry point and review outputs carefully.
+Codex subagent and plugin-agent support has changed across recent releases. If Codex does not expose the three specialist agents directly, the bundled `nf-module-manager` skill must use generic worker subagents with the source agent files as instructions. It must not silently do all file edits in the main session.
 
 Currently, Codex subagents may not reliably stop to ask the user for input when an agent instruction requires confirmation. This is especially relevant for profile selection, Singularity cache paths, and container placeholder resolution.
 
