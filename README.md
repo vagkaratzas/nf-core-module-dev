@@ -43,8 +43,6 @@ codex
 # Select the vagkaratzas marketplace, then install nf-core-module-dev.
 ```
 
-Restart Codex after installation. See [`codex/INSTALL.md`](codex/INSTALL.md) for local development installs and uninstall notes.
-
 ## Updating
 
 ### Claude Code

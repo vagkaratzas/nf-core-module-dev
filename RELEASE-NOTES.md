@@ -1,14 +1,13 @@
 # Release Notes
 
-## v1.3.0dev — [unreleased]
+## v1.3.0 — [2026/05/12]
 
 ### Codex packaging
 
 - added a source-controlled `.codex-plugin/plugin.json` so Codex installs no longer depend on generating the plugin manifest at install time
 - kept `.claude-plugin/marketplace.json` as the shared marketplace catalog for both Claude Code and Codex; it now includes Codex-compatible `interface`, `policy`, `category`, and Git URL source metadata
-- added `codex/hooks.json` as an explicit no-op Codex lifecycle config so Codex installs do not accidentally load the Claude-only session hook
-- updated `codex/install.sh` to copy the committed Codex manifest and no-op hook while still normalizing agent and skill frontmatter for local development installs
-- updated install docs to prefer `codex plugin marketplace add vagkaratzas/nf-core-module-dev` plus `/plugins`, with `codex/install.sh` documented as a local development helper
+- removed the manual Codex install/uninstall scripts now that marketplace plugin installation is working
+- updated install docs to prefer `codex plugin marketplace add vagkaratzas/nf-core-module-dev` plus `/plugins`
 - added `.codex-plugin/plugin.json` to the version bump configuration so Claude and Codex manifests stay in sync
 - added a Codex fallback path to `nf-module-manager`: when named plugin agents are unavailable, it must ask for explicit generic-worker delegation, pass each worker a self-contained prompt with the matching source agent instructions, and avoid editing files in the main session
 
@@ -61,7 +60,7 @@ Aligned with the nf-core tools v4.0.2 ruleset.
 - `nf-test-expert`: added explicit rule that `process.out.findAll { key, val -> key.startsWith("versions") }` is the only correct way to assert versions when `snapshot(sanitizeOutput(process.out)).match()` is not working
 - `nf-module-dev`: added explicit container directive rules — look up the matching tag at `quay.io/repository/biocontainers/<package>?tab=tags` when the package is on Bioconda; in any other case leave placeholders and ask the user — never generate Wave containers
 - `nf-module-manager`: hardened the no-file-editing rule — the orchestrator is now explicitly forbidden from editing any file regardless of how trivial the change; all edits must be delegated to the appropriate agent
-- **Codex support**: Codex can now be installed via `codex/install.sh` (Linux/macOS; Windows requires WSL or Git Bash), which generates `.codex-plugin/plugin.json` at install time and installs a normalized local plugin copy.
+- **Codex support**: initially added local Codex installation via `codex/install.sh` (removed in v1.3.0 after marketplace installation became the supported path).
 
 ## v1.0.0 — [2026/04/15] — Initial release
 

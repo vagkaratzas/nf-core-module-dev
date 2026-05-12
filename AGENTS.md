@@ -19,7 +19,6 @@ claude plugin install nf-core-module-dev@vagkaratzas
 agents/          ← three specialist agents (source of truth for both platforms)
 skills/          ← nf-module-manager orchestrator + session bootstrap
 hooks/           ← Claude Code session-start hook
-codex/           ← local Codex install helper + Codex-specific no-op hooks
 .claude-plugin/  ← Claude Code plugin manifest + shared marketplace catalog
 .codex-plugin/   ← Codex plugin manifest
 ```
@@ -42,11 +41,6 @@ nf-core-module-dev/
 │       └── SKILL.md             ← session-start bootstrap
 ├── hooks/
 │   └── hooks.json               ← injects bootstrap skill at session start for Claude
-└── codex/
-    ├── INSTALL.md               ← Codex install guide
-    ├── hooks.json               ← no-op lifecycle config for Codex installs
-    ├── install.sh               ← installs a normalized local copy for development
-    └── uninstall.sh
 ```
 
 ## Agent responsibilities
@@ -72,14 +66,14 @@ The reference sections replace the old `agent-memory/` directory. When a runtime
 ## Multi-platform support
 
 - **Claude Code**: full plugin with agents, skills, and session hook through the Claude marketplace.
-- **Codex**: uses the shared marketplace catalog in `.claude-plugin/marketplace.json` plus the source-controlled Codex manifest in `.codex-plugin/plugin.json`. `codex/install.sh` remains a local development helper that copies normalized agents and skills into Codex's local plugin cache.
+- **Codex**: uses the shared marketplace catalog in `.claude-plugin/marketplace.json` plus the source-controlled Codex manifest in `.codex-plugin/plugin.json`.
 
 Agents must remain self-contained so their instructions can be reused by Codex generic worker subagents when plugin-named agents are unavailable.
 
 ## Cross-platform rules — do not break these
 
 1. **Agents must be self-contained.** No cross-agent calls in the agent body — agents run standalone on Codex without an orchestrator.
-2. **Keep Claude-Code-specific frontmatter in `agents/*.md`** (`tools`, `model`, `color`). The `codex/install.sh` local helper strips them at install time. Do NOT remove them from the source files.
+2. **Keep Claude-Code-specific frontmatter in `agents/*.md`** (`tools`, `model`, `color`). Do NOT remove them from the source files.
 3. **`nf-module-manager` dispatches agents by name first** (`nf-core-module-dev:nf-module-dev` etc.). If a Codex surface exposes only generic worker subagents, the manager must use the Codex fallback in `skills/nf-module-manager/SKILL.md`; it must not edit files in the main session.
 4. **The shared marketplace catalog lives in `.claude-plugin/marketplace.json`.** Codex can read Claude-style marketplace catalogs, so do not duplicate it under `.agents/plugins/marketplace.json` unless there is a concrete Codex-only marketplace requirement.
 5. **Codex's plugin manifest lives in `.codex-plugin/plugin.json`.** Only `plugin.json` belongs in `.codex-plugin/`; Codex-specific support files belong elsewhere.
@@ -92,7 +86,7 @@ Codex users can add this repository as a marketplace:
 codex plugin marketplace add vagkaratzas/nf-core-module-dev
 ```
 
-Then install `nf-core-module-dev` from `/plugins`. For local development, run `./codex/install.sh` from a local clone, then restart Codex. Re-run the installer after `git pull`. See `codex/INSTALL.md` for full details.
+Then install `nf-core-module-dev` from `/plugins` and restart Codex.
 
 ## Adding or updating knowledge
 
@@ -124,5 +118,3 @@ scripts/bump-version.sh 1.1.0
 ## Hooks
 
 `hooks/session-start` reads `skills/using-nf-core-module-dev/SKILL.md` and injects it into the session context via `hookSpecificOutput.additionalContext`. `hooks/run-hook.cmd` is a cross-platform wrapper (Unix + Windows), and `hooks/hooks.json` invokes it via a repo-relative path so the shared hook config is not tied to Claude-specific environment variables.
-
-Codex installs use `codex/hooks.json` as an explicit no-op lifecycle config so Codex does not accidentally load the Claude-only `hooks/hooks.json`.
