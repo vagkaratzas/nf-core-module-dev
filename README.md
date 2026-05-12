@@ -69,13 +69,7 @@ claude plugin list
 codex plugin marketplace upgrade vagkaratzas
 ```
 
-Then restart Codex and update or reinstall `nf-core-module-dev` from `/plugins`.
-
-If the configured marketplace name differs:
-
-```bash
-codex plugin marketplace list
-```
+Then restart Codex and reinstall `nf-core-module-dev` from `/plugins`.
 
 ## Usage
 
