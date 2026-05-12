@@ -34,15 +34,16 @@ Then start a new session. The plugin bootstraps automatically — you get the fu
 
 ### Codex
 
-Codex installation is installer-only (Linux/macOS; Windows requires WSL or Git Bash):
+Codex can use the same marketplace repository. Add the marketplace, then install the plugin from the Codex plugin browser:
 
 ```bash
-git clone https://github.com/vagkaratzas/nf-core-module-dev.git ~/.codex/nf-core-module-dev
-cd ~/.codex/nf-core-module-dev
-./codex/install.sh
+codex plugin marketplace add vagkaratzas/nf-core-module-dev
+codex
+# In Codex: /plugins
+# Select the vagkaratzas marketplace, then install nf-core-module-dev.
 ```
 
-Restart Codex (full quit). Re-run `./codex/install.sh` after `git pull` to update the installed plugin. See [`codex/INSTALL.md`](codex/INSTALL.md) for details and uninstall instructions.
+Restart Codex after installation. See [`codex/INSTALL.md`](codex/INSTALL.md) for local development installs and uninstall notes.
 
 ## Usage
 
@@ -87,7 +88,7 @@ Agents carry their domain knowledge as embedded reference sections — no separa
 
 ## Releasing
 
-Version numbers are kept in sync across the Claude plugin manifests and the Codex installer using the included bump script:
+Version numbers are kept in sync across the Claude marketplace, Claude plugin manifest, and Codex plugin manifest using the included bump script:
 
 ```bash
 # Check versions are in sync

@@ -1,5 +1,16 @@
 # Release Notes
 
+## v1.3.0dev — [unreleased]
+
+### Codex packaging
+
+- added a source-controlled `.codex-plugin/plugin.json` so Codex installs no longer depend on generating the plugin manifest at install time
+- kept `.claude-plugin/marketplace.json` as the shared marketplace catalog for both Claude Code and Codex; it now includes Codex-compatible `interface`, `policy`, `category`, and Git URL source metadata
+- added `codex/hooks.json` as an explicit no-op Codex lifecycle config so Codex installs do not accidentally load the Claude-only session hook
+- updated `codex/install.sh` to copy the committed Codex manifest and no-op hook while still normalizing agent and skill frontmatter for local development installs
+- updated install docs to prefer `codex plugin marketplace add vagkaratzas/nf-core-module-dev` plus `/plugins`, with `codex/install.sh` documented as a local development helper
+- added `.codex-plugin/plugin.json` to the version bump configuration so Claude and Codex manifests stay in sync
+
 ## v1.2.0 — [2026/05/01]
 
 Aligned with the nf-core tools v4.0.2 ruleset.

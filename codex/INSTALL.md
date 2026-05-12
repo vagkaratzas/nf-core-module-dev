@@ -1,60 +1,87 @@
 # Installing nf-core-module-dev for Codex
 
-Codex support is installer-only. This repository does not publish Codex marketplace metadata or a repo-root `.codex-plugin/plugin.json`.
+Codex uses the repository's shared marketplace catalog at `.claude-plugin/marketplace.json` and the Codex plugin manifest at `.codex-plugin/plugin.json`.
 
-Use the local installer to generate the Codex manifest and install a normalized plugin copy into Codex's local plugin cache.
+## Marketplace Installation
 
-## Prerequisites
-
-- Linux or macOS (the installer is a bash script; Windows users need WSL or Git Bash)
-- Git
-- Codex CLI installed
-
-## Installation
-
-1. **Clone the repository:**
+1. **Add the marketplace:**
    ```bash
-   git clone https://github.com/vagkaratzas/nf-core-module-dev.git ~/.codex/nf-core-module-dev
+   codex plugin marketplace add vagkaratzas/nf-core-module-dev
    ```
 
-2. **Run the install script:**
+2. **Open the plugin browser:**
    ```bash
-   cd ~/.codex/nf-core-module-dev
-   ./codex/install.sh
+   codex
    ```
 
-   The script installs to `~/.codex/plugins/cache/local/nf-core-module-dev/<version>/`, generates `.codex-plugin/plugin.json` at install time, and normalizes frontmatter for Codex:
-   - agents: `model` set to `inherit`; `tools` and `color` stripped
-   - skills: only `name` and `description` kept in frontmatter
+   Then run:
+   ```text
+   /plugins
+   ```
 
-3. **Restart Codex** (full quit and relaunch — not just a model reload).
+3. **Install the plugin:**
+   - Select the `vagkaratzas` marketplace.
+   - Open `nf-core-module-dev`.
+   - Select `Install plugin`.
 
-## What you get
+4. **Restart Codex** so bundled skills and plugin metadata are loaded in a fresh session.
+
+## Local Development Installation
+
+For testing an unpublished working tree, use the local helper:
+
+```bash
+git clone https://github.com/vagkaratzas/nf-core-module-dev.git ~/.codex/nf-core-module-dev
+cd ~/.codex/nf-core-module-dev
+./codex/install.sh
+```
+
+The helper installs a normalized copy into `~/.codex/plugins/cache/local/nf-core-module-dev/<version>/`:
+- `.codex-plugin/plugin.json` is copied from the source-controlled Codex manifest
+- `codex/hooks.json` disables accidental loading of the Claude-only session hook
+- agents: `model` is set to `inherit`; `tools` and `color` are stripped
+- skills: only `name` and `description` are kept in frontmatter
+
+Restart Codex after running the helper. Re-run it after `git pull` to refresh the installed local copy.
+
+## What You Get
 
 | Component | Available on Codex |
 |-----------|-------------------|
-| `nf-module-dev` agent | yes |
-| `nf-test-expert` agent | yes |
-| `nf-secretary` agent | yes |
+| `nf-module-dev` agent | yes, when the Codex surface supports plugin agents |
+| `nf-test-expert` agent | yes, when the Codex surface supports plugin agents |
+| `nf-secretary` agent | yes, when the Codex surface supports plugin agents |
 | `nf-module-manager` skill | yes |
 | `using-nf-core-module-dev` bootstrap | yes |
 
-## Updating The Install
+## Updating
+
+For marketplace installs, update the marketplace from Codex:
 
 ```bash
-cd ~/.codex/nf-core-module-dev && git pull && ./codex/install.sh
+codex plugin marketplace upgrade vagkaratzas
 ```
 
-The install script overwrites the installed copy. Re-run it after `git pull`.
+For local helper installs:
 
-## Uninstalling
+```bash
+cd ~/.codex/nf-core-module-dev
+git pull
+./codex/install.sh
+```
+
+## Uninstalling Local Helper Installs
 
 ```bash
 ~/.codex/nf-core-module-dev/codex/uninstall.sh
 ```
 
-## Known limitations
+For marketplace installs, uninstall from the Codex `/plugins` browser.
 
-Currently, Codex subagents (tested model gpt-5.4) do not reliably follow instructions that require stopping to ask the user for input (e.g. confirming paths, choosing a profile, resolving ambiguity). Instead of pausing, they tend to proceed with their own assumptions and produce suboptimal or incorrect results.
+## Known Limitations
 
-**Recommendation**: prefer Claude Code for end-to-end module work. Use the Codex install only when Claude Code is unavailable, and be prepared to review and correct agent outputs manually.
+Codex subagent and plugin-agent support has changed across recent releases. If Codex does not expose the three specialist agents directly, use the bundled `nf-module-manager` skill as the entry point and review outputs carefully.
+
+Currently, Codex subagents may not reliably stop to ask the user for input when an agent instruction requires confirmation. This is especially relevant for profile selection, Singularity cache paths, and container placeholder resolution.
+
+**Recommendation**: prefer Claude Code for the most reliable end-to-end module workflow. Use the Codex plugin when Claude Code is unavailable or when you are prepared to review and correct agent outputs manually.
