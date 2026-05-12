@@ -11,8 +11,9 @@ The **nf-core-module-dev** plugin — agents and skills for creating, testing, a
 ```
 agents/          ← three specialist agents (source of truth for both platforms)
 skills/          ← nf-module-manager orchestrator + session bootstrap
-codex/           ← install.sh / uninstall.sh for Codex local installation
+codex/           ← local Codex install helper + Codex-specific no-op hooks
 .claude-plugin/  ← Claude Code plugin manifest
+.codex-plugin/   ← Codex plugin manifest
 ```
 
 ## Agent responsibilities
@@ -26,12 +27,20 @@ codex/           ← install.sh / uninstall.sh for Codex local installation
 ## Cross-platform rules — do not break these
 
 1. **Agents must be self-contained.** No cross-agent calls in the agent body — agents run standalone on Codex without an orchestrator.
-2. **Keep Claude-Code-specific frontmatter in `agents/*.md`** (`tools`, `model`, `color`). The `codex/install.sh` strips them at install time. Do NOT remove them from the source files.
+2. **Keep Claude-Code-specific frontmatter in `agents/*.md`** (`tools`, `model`, `color`). The `codex/install.sh` local helper strips them at install time. Do NOT remove them from the source files.
 3. **`nf-module-manager` dispatches agents by name** (`nf-core-module-dev:nf-module-dev` etc.). Both Claude Code and Codex interpret this format; do not replace it with platform-specific tool syntax.
+4. **The shared marketplace catalog lives in `.claude-plugin/marketplace.json`.** Codex can read Claude-style marketplace catalogs, so do not duplicate it under `.agents/plugins/marketplace.json` unless there is a concrete Codex-only marketplace requirement.
+5. **Codex's plugin manifest lives in `.codex-plugin/plugin.json`.** Only `plugin.json` belongs in `.codex-plugin/`; Codex-specific support files belong elsewhere.
 
 ## Installing for Codex
 
-Codex support is installer-only. Run `./codex/install.sh` from a local clone, then restart Codex. Re-run the installer after `git pull`. See `codex/INSTALL.md` for full details.
+Codex users can add this repository as a marketplace:
+
+```bash
+codex plugin marketplace add vagkaratzas/nf-core-module-dev
+```
+
+Then install `nf-core-module-dev` from `/plugins`. For local development, run `./codex/install.sh` from a local clone, then restart Codex. Re-run the installer after `git pull`. See `codex/INSTALL.md` for full details.
 
 ## Adding knowledge
 

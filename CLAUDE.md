@@ -16,6 +16,7 @@ claude plugin install nf-core-module-dev@vagkaratzas
 ```
 nf-core-module-dev/
 ├── .claude-plugin/plugin.json   ← plugin manifest (name, version, author)
+├── .codex-plugin/plugin.json    ← Codex plugin manifest
 ├── agents/
 │   ├── nf-module-dev.md         ← creates/updates main.nf + environment.yml
 │   ├── nf-test-expert.md        ← writes and runs nf-tests + snapshots
@@ -29,14 +30,15 @@ nf-core-module-dev/
 │   └── hooks.json               ← injects bootstrap skill at session start
 └── codex/
     ├── INSTALL.md               ← Codex install guide
-    ├── install.sh               ← generates the Codex manifest and installs a normalized local copy
+    ├── hooks.json                ← no-op lifecycle config for Codex installs
+    ├── install.sh               ← installs a normalized local copy for development
     └── uninstall.sh
 ```
 
 ## Multi-platform support
 
 - **Claude Code** is the primary target: full plugin with agents, skills, and hooks through the Claude marketplace.
-- **Codex** is installer-only: `codex/install.sh` generates the installed `.codex-plugin/plugin.json` and copies normalized agents and skills into Codex's local plugin cache.
+- **Codex** uses the shared marketplace catalog in `.claude-plugin/marketplace.json` plus the source-controlled Codex manifest in `.codex-plugin/plugin.json`. `codex/install.sh` remains as a local development helper that copies normalized agents and skills into Codex's local plugin cache.
 
 Agents must remain self-contained — no cross-agent calls in their content — so they work standalone on Codex.
 
@@ -72,7 +74,9 @@ Agent files use `<modules_repo>` and `<singularity_cache>` as placeholders for p
 
 ## Plugin manifest
 
-`.claude-plugin/plugin.json` follows the Claude Code plugin schema. Both Claude `plugin.json` and `marketplace.json` must stay in sync — use the bump script:
+`.claude-plugin/plugin.json` follows the Claude Code plugin schema. `.codex-plugin/plugin.json` follows the Codex plugin schema. The shared marketplace catalog stays in `.claude-plugin/marketplace.json` because both Claude and Codex can read it.
+
+All version fields must stay in sync — use the bump script:
 
 ```bash
 # Check current versions are in sync
@@ -85,3 +89,5 @@ scripts/bump-version.sh 1.1.0
 ## Hook
 
 `hooks/session-start` reads `skills/using-nf-core-module-dev/SKILL.md` and injects it into the session context via `hookSpecificOutput.additionalContext`. `hooks/run-hook.cmd` is a cross-platform wrapper (Unix + Windows), and `hooks/hooks.json` now invokes it via a repo-relative path so the shared hook config is not tied to Claude-specific environment variables.
+
+Codex installs use `codex/hooks.json` as an explicit no-op lifecycle config so Codex does not accidentally load the Claude-only `hooks/hooks.json`.
