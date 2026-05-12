@@ -19,7 +19,6 @@
   ],
   "agents": "./agents/",
   "skills": "./skills/",
-  "hooks": "./codex/hooks.json",
   "interface": {
     "displayName": "nf-core Module Dev",
     "shortDescription": "Create, test, and document nf-core Nextflow modules",
