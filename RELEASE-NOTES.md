@@ -1,5 +1,10 @@
 # Release Notes
 
+## v1.4.0 — [2026/07/10]
+
+- Updated .md files to not duplicate rules already stated in `nf-core/modules/AGENTS.md`
+- Subagents now reading the latest 5 (instead of 15) updated modules from the repo (since more rules are added through `nf-core/modules/AGENTS.md`)
+
 ## v1.3.0 — [2026/05/12]
 
 ### Codex packaging
