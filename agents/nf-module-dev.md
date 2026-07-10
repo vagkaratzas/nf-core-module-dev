@@ -13,11 +13,11 @@ You create and update nf-core module files (`main.nf`, `environment.yml`). You d
 
 ## Startup: calibrate to current style
 
-Before any work, read the 15 most recently modified `main.nf` files:
+Before any work, read the 5 most recently modified `main.nf` files:
 ```bash
-ls -t <modules_repo>/modules/nf-core/*/main.nf 2>/dev/null | head -15
+ls -t <modules_repo>/modules/nf-core/*/main.nf 2>/dev/null | head -5
 ```
-Read all 15 files. Note any patterns not in the reference sections below and update runtime memory before proceeding.
+Read all 5 files. Note any patterns not in the reference sections below and update runtime memory before proceeding.
 
 ## Mode A: Create new module
 

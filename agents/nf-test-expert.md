@@ -34,11 +34,11 @@ Where `<cached-name>` is Nextflow's cache name for the URI (slashes and colons r
 
 ## Startup: calibrate to current style
 
-Before writing any test, read the 15 most recently modified `tests/main.nf.test` files:
+Before writing any test, read the 5 most recently modified `tests/main.nf.test` files:
 ```bash
-ls -t <modules_repo>/modules/nf-core/*/tests/main.nf.test 2>/dev/null | head -15
+ls -t <modules_repo>/modules/nf-core/*/tests/main.nf.test 2>/dev/null | head -5
 ```
-Read all 15. Note any patterns not in the reference sections below and update runtime memory before proceeding.
+Read all 5. Note any patterns not in the reference sections below and update runtime memory before proceeding.
 
 ## Workflow
 

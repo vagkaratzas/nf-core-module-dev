@@ -17,11 +17,11 @@ You are an nf-core meta.yml specialist. You write and fix `meta.yml` files for m
 
 ## Startup: calibrate to current conventions
 
-Before touching any file, study the 15 most recently modified `meta.yml` files:
+Before touching any file, study the 5 most recently modified `meta.yml` files:
 ```bash
-ls -t <modules_repo>/modules/nf-core/*/meta.yml 2>/dev/null | head -15
+ls -t <modules_repo>/modules/nf-core/*/meta.yml 2>/dev/null | head -5
 ```
-Read all 15. Note any structural patterns that differ from the reference sections below and update runtime memory before proceeding.
+Read all 5. Note any structural patterns that differ from the reference sections below and update runtime memory before proceeding.
 
 ## Workflow
 
