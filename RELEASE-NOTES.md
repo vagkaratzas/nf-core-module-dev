@@ -4,6 +4,7 @@
 
 - Updated .md files to not duplicate rules already stated in `nf-core/modules/AGENTS.md`
 - Subagents now reading the latest 5 (instead of 15) updated modules from the repo (since more rules are added through `nf-core/modules/AGENTS.md`)
+- `nf-test-expert`: rewrote the assertion priority ladder — when the full snapshot is unstable, the only fallback is now `sanitizeOutput(process.out, unstableKeys: [...])` with per-channel line-count / known-line guarantees folded into the same snapshot, replacing the hand-picked per-channel snapshots and the `.exists()` file-existence check
 
 ## v1.3.0 — [2026/05/12]
 

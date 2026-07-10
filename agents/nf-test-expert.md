@@ -97,21 +97,45 @@ nf-test test /path/to/main.nf.test --profile=+singularity --verbose --tag "<test
 
 ## Reference: assertion priority
 
-All options must be wrapped in `snapshot(...).match()` inside `assertAll()`. Try them in order — only downgrade when the higher-priority option proves unstable.
+Everything you assert belongs **inside** `snapshot(...).match()`, inside `assertAll()`. Never assert output content in a bare `assert` outside the snapshot.
 
-1. **Full snapshot** — always try first:
-   `snapshot(sanitizeOutput(process.out)).match()`
-2. **Per-channel + line count** — for outputs whose content varies but length is stable (e.g. headers with timestamps, sorted-but-randomized rows):
-   `snapshot(process.out.stable_channel, path(process.out.unstable_channel[0][1]).readLines().size(), process.out.findAll { key, val -> key.startsWith("versions") }).match()`
-3. **Per-channel + line content match** — when line count is also unstable but specific known lines must always be present (e.g. a header line, a fixed marker row):
-   `snapshot(process.out.stable_channel, path(process.out.unstable_channel[0][1]).readLines().contains("<expected line>"), process.out.findAll { key, val -> key.startsWith("versions") }).match()`
-   The `.contains(...)` returns a boolean (`true`/`false`) which snapshots cleanly. Pick a line guaranteed by the tool's output spec — never a line whose presence is incidental.
-4. **File existence only** — last resort, when nothing about the file content is stable:
-   `snapshot(path(process.out.unstable_channel[0][1]).exists(), process.out.findAll { key, val -> key.startsWith("versions") }).match()`
+### 1. Full snapshot — always try first
 
-Stubs always use priority 1 regardless of real test strategy.
+```groovy
+{ assert snapshot(sanitizeOutput(process.out)).match() }
+```
 
-**Versions assertion rule**: When option 1 (`snapshot(sanitizeOutput(process.out)).match()`) is not working, `process.out.findAll { key, val -> key.startsWith("versions") }` is THE ONLY correct way to assert versions in options 2–4. Never use `path(process.out.versions[0]).yaml` or any other form.
+Only leave this when a channel's md5sum genuinely varies between runs (timestamps, run IDs, absolute paths, randomised row order).
+
+### 2. Full snapshot + `unstableKeys` — the only fallback
+
+Do **not** hand-pick stable channels one by one. Keep the full snapshot and exempt the unstable channels by emit name via `sanitizeOutput`'s `unstableKeys:` argument; they are then captured as filenames only, not md5sums. Everything else — versions included — stays fully snapshotted.
+
+```groovy
+{ assert snapshot(sanitizeOutput(process.out, unstableKeys: ["log", "adaptor_report"])).match() }
+```
+
+`unstableKeys` takes emit channel names, not file paths. List only the genuinely unstable channels.
+
+Then, for **each** exempted channel, add back the strongest content guarantee that is still stable (if possible), as a further argument to the same `snapshot(...)` call. Work down the following two options per channel — a module may land on a different rung for each:
+
+**2a. Line count** — content varies, length does not:
+```groovy
+{ assert snapshot(
+    sanitizeOutput(process.out, unstableKeys: ["log"]),
+    path(process.out.log[0][1]).readLines().size()
+).match() }
+```
+
+**2b. Known line present** — line count also varies, but a line guaranteed by the tool's output spec must always appear:
+```groovy
+{ assert snapshot(
+    sanitizeOutput(process.out, unstableKeys: ["log", "adaptor_report"]),
+    path(process.out.log[0][1]).readLines().size(),
+    path(process.out.adaptor_report[0][1]).text.contains('Pacific Biosciences Blunt Adapter')
+).match() }
+```
+`.contains(...)` returns a boolean, which snapshots cleanly. Pick a line the tool always emits — never one whose presence is incidental.
 
 **Empty-output rule**: Real (non-stub) tests must NOT snapshot md5sums of empty files. If a snapshot captures a `d41d8cd98f00b204e9800998ecf8427e` (empty-file MD5), the tool produced no output — fix the test data or disregard that channel output completely.
 
