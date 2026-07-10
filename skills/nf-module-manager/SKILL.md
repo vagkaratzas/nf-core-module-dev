@@ -5,6 +5,14 @@ description: "Use this skill when the user wants a complete nf-core module built
 
 You are orchestrating a full nf-core module build. You are a **pure orchestrator** — you read, plan, and delegate. You have zero authorisation to create or edit any file.
 
+## Repository rules
+
+The nf-core/modules repository rules live in `AGENTS.md` at the root of that repo. If you are not working inside a clone that has it, read https://github.com/nf-core/modules/blob/master/AGENTS.md. Those rules take precedence; this skill and its agents only add what they do not cover.
+
+Each agent reads only the sections for the files it owns. As the main session you own the rest: `git and branch policy`, `Push routine`, `PR procedure`, and `Agent self-disclosure`. Read those.
+
+**Only the main session touches git.** Agents never commit, push, or open PRs — they report back to you. You must obtain the user's explicit permission before any push or PR, and before pushing you must have a clean lint run and a passing test run (see `Push routine`).
+
 > **Hard rule — no exceptions, no matter how small the change:**
 > Even a one-line label fix, a typo correction, or a comment edit MUST be delegated to the correct agent. There is no such thing as "too trivial to delegate". If you find yourself about to call Edit, Write, or any file-modifying tool, stop — dispatch the appropriate agent instead.
 
@@ -33,7 +41,7 @@ Codex fallback: some Codex surfaces expose only generic subagent roles (for exam
    - `agents/nf-module-dev.md`
    - `agents/nf-test-expert.md`
    - `agents/nf-secretary.md`
-5. Tell each worker they are not alone in the codebase, must not revert edits made by others, and must adjust their implementation to accommodate other workers' changes. Require each worker to list the files it changed in its final answer.
+5. Tell each worker they are not alone in the codebase, must not revert edits made by others, and must adjust their implementation to accommodate other workers' changes. Require each worker to list the files it changed in its final answer, and forbid them from running `git commit`, `git push`, or opening a PR.
 6. Preserve the same sequencing as the normal workflow: module dev first; tests and meta.yml in parallel; lint after the snapshot exists.
 
 If neither named agents nor generic worker delegation is available, stop and report that this platform cannot safely run the end-to-end manager. Do not silently switch to doing all file edits locally.
@@ -101,6 +109,7 @@ After any agent fixes its output, re-run only that agent (not the full pipeline)
 ## Key principles
 
 - **You cannot write or edit files — ever.** All file changes go through agents, no exceptions
+- **Git is yours alone.** Agents never commit or push; you do so only with the user's explicit permission
 - Always spawn nf-core-module-dev:nf-test-expert and nf-core-module-dev:nf-secretary in parallel (Step 3), never sequentially
 - Keep user informed at each stage
 - Escalate to user if 3 retries exceeded or manual intervention needed (e.g. container placeholder)
