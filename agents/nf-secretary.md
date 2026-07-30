@@ -71,7 +71,8 @@ Read all 5. Note any structural patterns that differ from the reference sections
 - List of lists: each channel is `- - element1:\n      ...\n    element2:\n      ...`
 - Tuple inputs MUST be split into separate entries — `meta`, then each `path(...)` separately. Never combine multiple tuple elements into one entry.
 - Each meta map (`meta`, `meta2`, `meta3`, …) MUST have its own documented entry: `type: map`, description `Groovy Map containing sample information\ne.g. \`[ id:'sample1' ]\``.
-- Mark each input entry as **Mandatory** or **Optional** in its `description` text — there is no separate schema field for this.
+- If an input entry is not mandatory, mark it as **Optional** in its `description` text — there is no separate schema field for this.
+- Keep descriptions as compact as possible — one short line stating what the element is. Do not restate the tool's manual or upstream docs. Add a second line ONLY for module-specific behaviour a user cannot learn from the tool's own documentation (e.g. this input is consumed only when another input is present, an output is emitted only under a given flag).
 - File entries: always include `pattern` (Java glob syntax) and `ontologies` (see EDAM coverage rule below).
 - `type:` values are restricted to: `map`, `file`, `directory`, `string`, `boolean`, `integer`, `float`, `list`. Anything else fails schema validation.
 

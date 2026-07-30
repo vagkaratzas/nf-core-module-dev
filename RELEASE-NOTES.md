@@ -1,5 +1,9 @@
 # Release Notes
 
+## v1.5.0dev — [unreleased]
+
+- Making meta.yml descriptions more compact.
+
 ## v1.4.0 — [2026/07/10]
 
 - Updated .md files to not duplicate rules already stated in `nf-core/modules/AGENTS.md`
