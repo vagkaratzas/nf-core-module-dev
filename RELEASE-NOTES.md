@@ -2,7 +2,7 @@
 
 ## v1.5.0 — [2026/07/30]
 
-Aligned with the nf-core tools v4.0.2 ruleset.
+Aligned with the nf-core tools v4.1.0 ruleset.
 
 - `nf-secretary`:
     - more compact `meta.yml` input descriptions, and removed `Mandatory` (default) explicit statement.
