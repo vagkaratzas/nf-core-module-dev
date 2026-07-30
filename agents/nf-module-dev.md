@@ -40,6 +40,7 @@ Read all 5 files. Note any patterns not in the reference sections below and upda
 
 ## Mode A: Create new module
 
+0. **Check the name is legal**: at most one `/` — `<tool>` or `<tool/subtool>`. Deeper names (`aws/s3/ls`) fail the `main_nf_module_granularity` lint check. Flatten to two levels before scaffolding (i.e., `aws/s3ls`).
 1. **Research tool**: Cross-check official docs **and** the command's `--help` output (run it locally if a container is already pulled). Write down **every** mandatory + optional input file, mandatory + optional flag, and **every** output file the tool can produce — the agent will only expose what it documents here. Also capture: Bioconda package name + latest stable version, and the exact command to print the version string.
 2. **Determine resource label**: `process_single` → `process_low` → `process_medium` → `process_high` → `process_high_memory` / `process_long` based on known tool requirements
 3. **Scaffold**:
@@ -59,28 +60,41 @@ Read all 5 files. Note any patterns not in the reference sections below and upda
 
 Only modify what is explicitly requested:
 - `main.nf` changes: inputs/outputs/script/stub — touch nothing else
-- `environment.yml` changes: update package version only if a newer stable Bioconda release exists (verify via web search); if updated, also update the container directive in `main.nf` to match
+- `environment.yml` changes: update package version only if a newer stable Bioconda release exists (verify via web search). The container directive must then be re-resolved for the new version — you do not hand-edit it. For a Wave module, ask the user to run `nf-core modules bump-versions <tool/subcommand>` (it now resolves Seqera containers) or `nf-core modules containers create <tool/subcommand>`; for a legacy biocontainers module, look up the new quay.io tag per the rules below.
 
 ## Container directive rules
 
-> **NEVER create or generate Wave containers. NEVER guess a container URI.**
-> There are exactly two valid outcomes: fill the tag from quay.io, or leave a placeholder and ask.
+> **NEVER guess a container URI, and NEVER build Wave containers yourself.**
+> Building containers is the user's action, not yours — it hits the Seqera Wave API, needs their `TOWER_ACCESS_TOKEN`, and writes files you do not own (`.conda-lock/`, the `containers:` block in `meta.yml`).
 
-**When the package is on Bioconda:**
+Canonical form of the directive:
+```
+container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
+    ? '<singularity_url>'
+    : '<docker_image>'}"
+```
+
+Two valid registries. **Biocontainers is the default — use it unless told otherwise.** It is what `nf-core modules create` scaffolds (`quay.io/biocontainers/YOUR-TOOL-HERE`), and still the repo majority.
+
+**Default path — biocontainers:**
 
 1. Browse `https://quay.io/repository/biocontainers/<package>?tab=tags`
-2. Find the tag that matches the exact version in `environment.yml` (e.g. `1.6.6--pyhdfd78af_0`)
-3. Fill the container directive:
-   ```
-   container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-       'https://depot.galaxyproject.org/singularity/<package>:<tag>' :
-       'biocontainers/<package>:<tag>' }"
-   ```
+2. Find the tag matching the exact version in `environment.yml` (e.g. `1.6.6--pyhdfd78af_0`)
+3. Fill: `'https://depot.galaxyproject.org/singularity/<package>:<tag>'` / `'quay.io/biocontainers/<package>:<tag>'`
 
-**In any other case** (package not on Bioconda, tag not found, any uncertainty):
+No `containers:` block in `meta.yml` is expected or required on this path.
 
-- Leave `XXXX` placeholders in both the singularity and docker container strings
-- **Stop and immediately ask the user to supply the correct container URIs** — do not proceed past this point until they do
+**Opt-in, alternative path — Seqera Wave.** `modules create` now prints it as a follow-up hint. Take it only when the user asks, or when updating a module already on Wave:
+
+1. Leave `XXXX` placeholders in both branches of the directive.
+2. **Stop and ask the user to run** `nf-core modules containers create <tool/subcommand>` from the modules repo root — it fills `main.nf`, writes the `containers:` block in `meta.yml`, and drops conda lock files under the module's `.conda-lock/`.
+3. Resume only after they confirm. Never run it yourself; never hand-write the URIs it would have produced.
+
+It generates a `https://community-cr-prod.seqera.io/docker/registry/v2/...` singularity URL and a `community.wave.seqera.io/library/<pkg>:<version>--<hash>` docker image. Both carry Wave build hashes — unguessable by construction.
+
+Never migrate a module between the two registries unless asked. Once `main.nf` points at `community.wave.seqera.io`, lint additionally demands a `meta.yml` `containers:` block.
+
+**Any uncertainty** (package not on Bioconda, tag not found): placeholders + ask. Never a guess.
 
 ## main.nf rules
 
@@ -146,7 +160,11 @@ Rules:
 | `process_low` | Fast multi-CPU tools |
 | `process_medium` | Standard bioinformatics tools |
 | `process_high` | Memory/CPU intensive (e.g. eggnogmapper, yahs) |
-| Multiple labels | `process_medium` + `process_long` for long-running medium-CPU tools |
+| `process_low_memory` | Multi-CPU but light on RAM |
+| `process_high_memory` | RAM-bound regardless of CPU |
+| `process_long` | Long wall-clock runtime |
+
+Exactly one label. The linter accepts only the seven above, and warns `Conflicting process labels found` if two valid ones are set — so pick the single closest fit rather than stacking.
 
 
 ## Runtime memory

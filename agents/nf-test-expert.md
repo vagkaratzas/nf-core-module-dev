@@ -47,7 +47,7 @@ cd "$NXF_SINGULARITY_CACHEDIR" && \
   mv <cached-name>.img.pulling.<random> <cached-name>.img
 ```
 
-Where `<cached-name>` is Nextflow's cache name for the URI (slashes and colons replaced with `-`, e.g. `https://depot.galaxyproject.org/singularity/samtools:1.21--h50ea8bc_0` → `depot.galaxyproject.org-singularity-samtools-1.21--h50ea8bc_0`). After the user confirms the pull succeeded, re-run the test — Nextflow will pick up the cached image instead of trying to pull again.
+Where `<cached-name>` is Nextflow's cache name for the URI (slashes and colons replaced with `-`, e.g. `https://depot.galaxyproject.org/singularity/samtools:1.21--h50ea8bc_0` → `depot.galaxyproject.org-singularity-samtools-1.21--h50ea8bc_0`). Most current modules ship a Seqera Wave URL instead (`https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/...`), whose cache name is an opaque blob hash — get the exact name from the failing task's `.command.run` rather than deriving it. After the user confirms the pull succeeded, re-run the test — Nextflow will pick up the cached image instead of trying to pull again.
 
 ## Startup: calibrate to current style
 
