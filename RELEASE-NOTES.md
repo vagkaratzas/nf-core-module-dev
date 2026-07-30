@@ -1,8 +1,20 @@
 # Release Notes
 
-## v1.5.0dev — [unreleased]
+## v1.5.0 — [2026/07/30]
 
-- Making meta.yml descriptions more compact.
+Aligned with the nf-core tools v4.0.2 ruleset.
+
+- `nf-secretary`:
+    - more compact `meta.yml` input descriptions, and removed `Mandatory` (default) explicit statement.
+    - documented the new top-level `containers:` block in `meta.yml` (docker / singularity / conda per `linux/amd64` + `linux/arm64`, with `build_id`, `scan_id`, `https`, `lock_file`) as **machine-generated and read-only** — preserve verbatim, never fabricate. Covers the new `has_meta_containers`, `correct_meta_containers`, `containers_section_*`, and `containers_build_id_hash` lint checks
+    - boundaries now exclude the `containers:` block and `.conda-lock/*`, and forbid running `nf-core modules containers create` / `containers conda-lock` (they hit the Seqera Wave API with the user's `TOWER_ACCESS_TOKEN` and rewrite `main.nf`)
+- `nf-module-dev`:
+    - container rules now cover both registries explicitly — biocontainers stays the **default** (it is what `nf-core modules create` scaffolds and still the repo majority), with Seqera Wave documented as the opt-in path taken only on request or for modules already on it. On the Wave path the agent leaves placeholders and asks the **user** to run `nf-core modules containers create <tool/subcommand>`; it never builds containers itself. Explicit rule not to migrate a module between registries unprompted
+    - corrected the container directive template to `workflow.containerEngine in ['singularity', 'apptainer']` (was `== 'singularity'`) and `quay.io/biocontainers/<package>:<tag>` (was bare `biocontainers/`)
+    - `bump-versions` now resolves Seqera containers, so a version bump re-resolves the container rather than hand-editing it
+    - added `process_low_memory` to the resource label table (now lint-accepted), plus `process_high_memory` / `process_long` rows, and a rule to set exactly one label — two valid labels trigger a `Conflicting process labels found` warning
+    - added a pre-scaffold name check for the new `main_nf_module_granularity` lint rule — at most one `/` (`<tool>` or `<tool/subtool>`; `aws/s3/ls` fails)
+- `nf-test-expert`: singularity pull fallback now notes that most modules ship a Seqera Wave blob URL whose cache name is an opaque hash — read it from the failing task's `.command.run` rather than deriving it
 
 ## v1.4.0 — [2026/07/10]
 
