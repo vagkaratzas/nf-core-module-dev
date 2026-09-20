@@ -27,7 +27,7 @@ Preferred path: spawn the named plugin agents listed above.
 
 Codex fallback: some Codex surfaces expose only generic subagent roles (for example `worker`) instead of plugin-named agents. If named plugin agents are unavailable:
 
-1. Do **not** continue by editing files in the main session. The main session remains an orchestrator only.
+1. Do **not** continue by editing files in the main session. The main session remains an orchestrator only (the upstream limitations report of Step 4b is the sole file it writes, and it lives outside the repo).
 2. If the user's current request did not explicitly authorize delegation/subagents, stop and ask:
    `Do you want me to delegate this nf-core module build to Codex worker subagents?`
 3. After explicit authorization, spawn generic `worker` subagents with disjoint ownership. Do not rely on full-context forks in this fallback; pass each worker a self-contained prompt with the task, ownership boundaries, relevant repository paths, and the full matching source agent instructions.
@@ -51,7 +51,7 @@ If tool/subcommand is ambiguous, confirm with user before proceeding (e.g. `samt
 
 ### Step 2 — Module dev
 
-Spawn **nf-core-module-dev:nf-module-dev** with full tool/subcommand name and whether this is a create or update. Wait for its handoff note and review it before continuing.
+Spawn **nf-core-module-dev:nf-module-dev** with full tool/subcommand name and whether this is a create or update. Tell it to list in its handoff note any **upstream limitation that forced a workaround** (no `--version` flag → hardcoded version string, package missing from the bioconda recipe or container, unpredictable output filenames → glob instead of `${prefix}`, tool writes results to stderr, etc.). Wait for its handoff note and review it before continuing.
 
 **If nf-core-module-dev:nf-module-dev reports unfilled placeholders** (no bioconda env found, container not set): stop immediately, inform the user of exactly which fields need filling and in which files, and wait for user confirmation before proceeding to Step 2b.
 
@@ -64,6 +64,8 @@ Only runs if Step 2 was paused for placeholder filling. Once the user confirms t
 Spawn **nf-core-module-dev:nf-test-expert** AND **nf-core-module-dev:nf-secretary** simultaneously using the Agent tool — for WRITING only:
 - **nf-core-module-dev:nf-test-expert**: write test file → run with `--update-snapshot` to generate snapshot → run again without `--update-snapshot` to confirm clean pass → report done
 - **nf-core-module-dev:nf-secretary**: write `meta.yml` → report done (no lint yet)
+
+Tell both agents to list in their handoff notes any **upstream limitation that forced a workaround** — e.g. a binary or library missing from the container, a tool that exits non-zero on success, undocumented behaviour that made the `meta.yml` guesswork.
 
 Wait for BOTH to complete before proceeding.
 
@@ -94,6 +96,33 @@ Attribute errors carefully:
 
 After any agent fixes its output, re-run only that agent (not the full pipeline). Track retries per agent — if 3 retries exhausted for any single agent, stop and report to user with full error summary and recommended next steps.
 
+### Step 4b — Upstream limitations report (conditional)
+
+Collect every upstream limitation the agents reported. Write the report **only if at least one was collected** — never an empty one. Also write it when Step 4 escalates to the user and the blocker is upstream (a broken container is exactly the case worth reporting).
+
+Rules:
+
+- **Location: outside the module repository.** Use the session scratchpad directory when the platform provides one, otherwise the user's home. Never inside the `nf-core/modules` clone — it would be linted, committed, or shipped in the PR.
+- Name it `<tool>_<subcommand>-upstream-issues.md`.
+- Print the absolute path to the user and say what it is for: reporting the inconveniences to the original software authors.
+- This is the one file you write yourself; everything else still goes through agents.
+
+Template:
+
+```markdown
+# Upstream issues — <tool> <subcommand> v<version>
+
+Container/env: <biocontainer or wave URL, conda package>
+Found while packaging the tool as an nf-core module.
+
+## 1. <short title>
+
+- **nf-core expectation**: <what the standard requires>
+- **Actual behaviour**: <what the tool does>
+- **Workaround applied**: <what the module does instead> (`<file>:<line>`)
+- **Suggested upstream fix**: <the one-line ask>
+```
+
 ### Step 5 — Final report
 
 ```
@@ -101,11 +130,12 @@ After any agent fixes its output, re-run only that agent (not the full pipeline)
 ✅ Tests: passing (summarize test cases)
 ✅ meta.yml: complete
 ⚠️  Warnings: (list any lint warnings or notable decisions)
+📄 Upstream issues report: (absolute path, or "none")
 ```
 
 ## Key principles
 
-- **You should not write or edit files.** All file changes go through agents, no exceptions
+- **You should not write or edit files.** All module file changes go through agents — the single exception is the Step 4b upstream limitations report, which is not a module file, is owned by no agent, and is written outside the repo
 - **Git is yours alone.** Agents never commit or push; you do so only with the user's explicit permission
 - Always spawn nf-core-module-dev:nf-test-expert and nf-core-module-dev:nf-secretary in parallel (Step 3), never sequentially
 - Keep user informed at each stage

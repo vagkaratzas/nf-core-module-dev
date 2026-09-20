@@ -1,5 +1,9 @@
 # Release Notes
 
+## v1.6.0dev — [unreleased]
+
+- `nf-module-manager`: new Step 4b — when the upstream software cannot be ported cleanly (no `--version` flag, package missing from the container/conda recipe, unpredictable output names, non-zero exit on success, …), the orchestrator now collects those limitations from the agents' handoff notes and writes an `<tool>_<subcommand>-upstream-issues.md` report for the user to send to the original authors. Each entry states the nf-core expectation, the actual behaviour, the workaround applied (with `file:line`), and the suggested upstream fix. The report is written **outside** the modules clone (session scratchpad) so it is never linted, committed, or shipped in the PR, and its absolute path is printed in the final report. Agent spawn prompts in Steps 2 and 3 now explicitly ask for these limitations, which also covers the Codex generic-worker fallback. This report is the sole carve-out from the orchestrator's no-file-write rule
+
 ## v1.5.0 — [2026/07/30]
 
 Aligned with the nf-core tools v4.1.0 ruleset.
