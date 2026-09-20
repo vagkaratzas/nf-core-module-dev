@@ -17,7 +17,7 @@ Each agent reads only the sections for the files it owns. As the main session yo
 
 | Agent | Responsibility |
 |-------|---------------|
-| `nf-core-module-dev:nf-module-dev` | `main.nf`, `environment.yml` — create or update |
+| `nf-core-module-dev:nf-module-dev` | `main.nf`, `environment.yml`, and a rare module-root `nextflow.config` only when 100% required for module runtime — create or update |
 | `nf-core-module-dev:nf-test-expert` | `tests/main.nf.test`, snapshots — write and run |
 | `nf-core-module-dev:nf-secretary` | `meta.yml` — create or update |
 
@@ -31,7 +31,7 @@ Codex fallback: some Codex surfaces expose only generic subagent roles (for exam
 2. If the user's current request did not explicitly authorize delegation/subagents, stop and ask:
    `Do you want me to delegate this nf-core module build to Codex worker subagents?`
 3. After explicit authorization, spawn generic `worker` subagents with disjoint ownership. Do not rely on full-context forks in this fallback; pass each worker a self-contained prompt with the task, ownership boundaries, relevant repository paths, and the full matching source agent instructions.
-   - worker for `nf-module-dev`: owns only `main.nf`, `environment.yml`, and module-level `nextflow.config` if needed
+   - worker for `nf-module-dev`: owns only `main.nf`, `environment.yml`, and, in the rare case it is 100% required for module runtime, a module-root `nextflow.config` (never for nf-test-only configuration)
    - worker for `nf-test-expert`: owns only `tests/main.nf.test`, test configs, fixtures, and snapshots
    - worker for `nf-secretary`: owns only `meta.yml`
 4. Before spawning, read the matching source agent file and include its content in the worker prompt as operating instructions:
@@ -57,7 +57,7 @@ Spawn **nf-core-module-dev:nf-module-dev** with full tool/subcommand name and wh
 
 ### Step 2b — Resume module dev after placeholder fill (conditional)
 
-Only runs if Step 2 was paused for placeholder filling. Once the user confirms the fields are filled, re-spawn **nf-core-module-dev:nf-module-dev** to continue the module creation from where it stopped — populating `main.nf`, and creating `nextflow.config` if needed (steps 5–6 of its Mode A workflow). Wait for its handoff note before proceeding.
+Only runs if Step 2 was paused for placeholder filling. Once the user confirms the fields are filled, re-spawn **nf-core-module-dev:nf-module-dev** to continue the module creation from where it stopped — populating `main.nf`, and creating a module-root `nextflow.config` only if it is 100% required for the module to run as intended (never for nf-test-only configuration). Wait for its handoff note before proceeding.
 
 ### Step 3 — Parallel: write tests + write meta.yml
 

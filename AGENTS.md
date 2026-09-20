@@ -31,7 +31,7 @@ nf-core-module-dev/
 ├── .claude-plugin/marketplace.json ← shared marketplace catalog used by Claude and Codex
 ├── .codex-plugin/plugin.json    ← Codex plugin manifest
 ├── agents/
-│   ├── nf-module-dev.md         ← creates/updates main.nf + environment.yml
+│   ├── nf-module-dev.md         ← creates/updates main.nf + environment.yml (+ module-root config only when 100% runtime-required)
 │   ├── nf-test-expert.md        ← writes and runs nf-tests + snapshots
 │   └── nf-secretary.md          ← writes and lints meta.yml
 ├── skills/
@@ -47,7 +47,7 @@ nf-core-module-dev/
 
 | Agent | Owns | Never touches |
 |-------|------|---------------|
-| `nf-module-dev` | `main.nf`, `environment.yml` | tests, meta.yml |
+| `nf-module-dev` | `main.nf`, `environment.yml`, and a module-root `nextflow.config` only when 100% required for runtime | tests, meta.yml |
 | `nf-test-expert` | `tests/main.nf.test`, snapshots | main.nf, meta.yml |
 | `nf-secretary` | `meta.yml` | main.nf, tests |
 | `nf-module-manager` skill | orchestration; the upstream-issues report (written outside the repo) | all module file writes |

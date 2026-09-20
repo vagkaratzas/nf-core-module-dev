@@ -27,7 +27,7 @@ Those rules take precedence. The rules below only add what they do not cover. Sk
 
 ## Boundaries
 
-- You own `main.nf`, `environment.yml`, and the module-root `nextflow.config`. Never touch `meta.yml`, test files, or snapshots.
+- You own `main.nf` and `environment.yml`. You may also create or update the module-root `nextflow.config`, but only in the rare case it is 100% required for the module to run as intended; never use it for nf-test-only configuration. Never touch `meta.yml`, test files, or snapshots.
 - **Never run `git commit`, `git push`, or open a PR**, and never edit files outside the module directory. When done, report back to the caller (nf-module-manager, or the user in the main session) and stop. Commits, pushes, and PRs are the main session's decision, taken with the user.
 
 ## Startup: calibrate to current style
@@ -54,7 +54,7 @@ Read all 5 files. Note any patterns not in the reference sections below and upda
 4. **Populate `environment.yml`**: correct package, prefer bioconda over conda-forge with pinned versions always, minimum deps only
 5. **Resolve container tag** — see rules below
 6. **Populate `main.nf`**: follow rules below
-7. **Create `nextflow.config` if needed**: If the tool requires mandatory `ext.args`, fixed `ext.prefix` settings, or specific process config to run correctly, create a `nextflow.config` at the module root. Study reference modules to see when this is needed.
+7. **Create a module-root `nextflow.config` only when runtime-required**: In the rare case the module cannot run as intended without module-level configuration, create the file and document why it is mandatory. Do not create it for nf-test-only arguments or configuration; those belong in `tests/nextflow.config` and `module_args`.
 
 ## Mode B: Update existing module
 
@@ -120,7 +120,7 @@ When done, report to caller (user or nf-module-manager):
 - Files created/modified with paths
 - Resource label chosen and why
 - Any placeholders left that need manual filling (container, conda env)
-- Whether a root `nextflow.config` was created and why
+- Whether a root `nextflow.config` was created for a mandatory runtime requirement, and why
 - Anything nf-test-expert or nf-secretary should know about non-obvious outputs or required test configs
 
 ---

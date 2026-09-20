@@ -6,7 +6,7 @@ A Claude Code plugin that gives your coding agent specialised skills for creatin
 
 When you ask Claude to build an nf-core module, it doesn't just start writing code. The `nf-module-manager` skill orchestrates a structured pipeline:
 
-1. It delegates `main.nf` and `environment.yml` to **nf-module-dev**, which researches the tool, scaffolds the module, and populates it following current nf-core conventions.
+1. It delegates `main.nf` and `environment.yml` (plus a rare runtime-required module-root `nextflow.config`) to **nf-module-dev**, which researches the tool, scaffolds the module, and populates it following current nf-core conventions.
 2. It then launches **nf-test-expert** and **nf-secretary** in parallel — one writes and runs the nf-tests, the other writes the `meta.yml`.
 3. Once the snapshot exists, the meta.yml is linted. Errors are routed back to the right agent automatically (up to 3 retries per agent).
 4. You get a final report: module files, test results, lint status, and any warnings.
@@ -15,7 +15,7 @@ Each agent is a specialist:
 
 | Agent | Responsibility |
 |-------|---------------|
-| `nf-module-dev` | `main.nf`, `environment.yml` |
+| `nf-module-dev` | `main.nf`, `environment.yml`, and rare runtime-required module-root `nextflow.config` |
 | `nf-test-expert` | nf-tests, snapshots |
 | `nf-secretary` | `meta.yml`, linting |
 
@@ -90,7 +90,7 @@ For targeted work, agents can be invoked directly:
 - **using-nf-core-module-dev** — session-start bootstrap that tells Claude when to reach for each agent
 
 ### Agents
-- **nf-module-dev** — researches tools, scaffolds modules, populates `main.nf` and `environment.yml` following current nf-core style. Stops and waits for you if a bioconda/container environment can't be auto-detected.
+- **nf-module-dev** — researches tools, scaffolds modules, populates `main.nf` and `environment.yml` following current nf-core style, and creates a module-root `nextflow.config` only when 100% required for runtime behavior. Stops and waits for you if a bioconda/container environment can't be auto-detected.
 - **nf-test-expert** — writes nf-tests calibrated to current community style, generates and verifies snapshots, supports singularity/docker/conda profiles
 - **nf-secretary** — writes and lints `meta.yml`, handles topic-based versions, EDAM ontologies, and all known schema edge cases
 

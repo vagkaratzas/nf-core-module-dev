@@ -61,7 +61,7 @@ Read all 5. Note any patterns not in the reference sections below and update run
 
 1. **Calibrate**: Run startup study above
 2. **Examine `main.nf`**: Inputs, outputs, emit names, parameters
-3. **Check for configs**: Look for `nextflow.config` at module root (mandatory process config) and the module's `tests/*.config`. Use them when present. Never add extra config files — per-test `ext.args` go through `module_args` (see AGENTS.md).
+3. **Check for configs**: If a module-root `nextflow.config` exists, inspect it as runtime configuration but do not create or modify it for a test. Keep test-only configuration in `tests/nextflow.config`; per-test `ext.args` go through `module_args` (see AGENTS.md). Never add extra config files.
 4. **Check for test data**: Try to reuse test data from paths you studied above. Always prefer the **smallest file that still produces a meaningful result**. The sarscov2 files in the `modules` branch of [nf-core/test-datasets](https://github.com/nf-core/test-datasets) are the first choice — they are tiny, well-maintained, and cover most common formats (FASTQ, BAM, VCF, FASTA, …). Reference shared test data via the `params.modules_testdata_base_path` convention, not `${projectDir}`:
    ```groovy
    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true)
