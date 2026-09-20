@@ -105,7 +105,7 @@ After any agent fixes its output, re-run only that agent (not the full pipeline)
 
 ## Key principles
 
-- **You cannot write or edit files — ever.** All file changes go through agents, no exceptions
+- **You should not write or edit files.** All file changes go through agents, no exceptions
 - **Git is yours alone.** Agents never commit or push; you do so only with the user's explicit permission
 - Always spawn nf-core-module-dev:nf-test-expert and nf-core-module-dev:nf-secretary in parallel (Step 3), never sequentially
 - Keep user informed at each stage
