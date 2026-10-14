@@ -31,7 +31,7 @@ nf-core-module-dev/
 ├── .claude-plugin/marketplace.json ← shared marketplace catalog used by Claude and Codex
 ├── .codex-plugin/plugin.json    ← Codex plugin manifest
 ├── agents/
-│   ├── nf-module-dev.md         ← creates/updates main.nf + environment.yml
+│   ├── nf-module-dev.md         ← creates/updates main.nf + environment.yml (+ module-root config only when 100% runtime-required)
 │   ├── nf-test-expert.md        ← writes and runs nf-tests + snapshots
 │   └── nf-secretary.md          ← writes and lints meta.yml
 ├── skills/
@@ -47,10 +47,10 @@ nf-core-module-dev/
 
 | Agent | Owns | Never touches |
 |-------|------|---------------|
-| `nf-module-dev` | `main.nf`, `environment.yml` | tests, meta.yml |
+| `nf-module-dev` | `main.nf`, `environment.yml`, a module-root `nextflow.config` only when 100% required for runtime, and the Seqera container build (`nf-core modules containers create`, which also writes the `meta.yml` `containers:` block and `.conda-lock/`) | tests, the rest of meta.yml |
 | `nf-test-expert` | `tests/main.nf.test`, snapshots | main.nf, meta.yml |
 | `nf-secretary` | `meta.yml` | main.nf, tests |
-| `nf-module-manager` skill | orchestration only | all file writes |
+| `nf-module-manager` skill | orchestration; the upstream-issues report (written outside the repo) | all module file writes |
 
 ## Agent file structure
 
@@ -74,7 +74,7 @@ Agents must remain self-contained so their instructions can be reused by Codex g
 
 1. **Agents must be self-contained.** No cross-agent calls in the agent body — agents run standalone on Codex without an orchestrator.
 2. **Keep Claude-Code-specific frontmatter in `agents/*.md`** (`tools`, `model`, `color`). Do NOT remove them from the source files.
-3. **`nf-module-manager` dispatches agents by name first** (`nf-core-module-dev:nf-module-dev` etc.). If a Codex surface exposes only generic worker subagents, the manager must use the Codex fallback in `skills/nf-module-manager/SKILL.md`; it must not edit files in the main session.
+3. **`nf-module-manager` dispatches agents by name first** (`nf-core-module-dev:nf-module-dev` etc.). If a Codex surface exposes only generic worker subagents, the manager must use the Codex fallback in `skills/nf-module-manager/SKILL.md`; it must not edit files in the main session (the upstream-issues report of Step 4b is the sole exception).
 4. **The shared marketplace catalog lives in `.claude-plugin/marketplace.json`.** Codex can read Claude-style marketplace catalogs, so do not duplicate it under `.agents/plugins/marketplace.json` unless there is a concrete Codex-only marketplace requirement.
 5. **Codex's plugin manifest lives in `.codex-plugin/plugin.json`.** Only `plugin.json` belongs in `.codex-plugin/`; Codex-specific support files belong elsewhere.
 

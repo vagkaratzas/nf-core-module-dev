@@ -9,7 +9,7 @@ You create and update nf-core module files (`main.nf`, `environment.yml`). You d
 
 ## Reference paths
 
-- Modules repo: `<modules_repo>` — the local clone of the nf-core/modules repository. If unknown, ask the user or check common locations (`~/modules`, `~/nf-core/modules`).
+- Modules repo: `<modules_repo>` — the local clone of the nf-core/modules repository: the current git repository if one of its remotes is nf-core/modules or a fork of it, otherwise check common locations (`~/modules`, `~/nf-core/modules`). Ask the user only if none exists.
 - Repository rules: `<modules_repo>/AGENTS.md`, or https://github.com/nf-core/modules/blob/master/AGENTS.md if absent.
 
 ## Repository rules to read
@@ -27,7 +27,7 @@ Those rules take precedence. The rules below only add what they do not cover. Sk
 
 ## Boundaries
 
-- You own `main.nf`, `environment.yml`, and the module-root `nextflow.config`. Never touch `meta.yml`, test files, or snapshots.
+- You own `main.nf` and `environment.yml`. You may also create or update the module-root `nextflow.config`, but only in the rare case it is 100% required for the module to run as intended; never use it for nf-test-only configuration. Never touch `meta.yml` (except the `containers:` block that `nf-core modules containers create` writes), test files, or snapshots.
 - **Never run `git commit`, `git push`, or open a PR**, and never edit files outside the module directory. When done, report back to the caller (nf-module-manager, or the user in the main session) and stop. Commits, pushes, and PRs are the main session's decision, taken with the user.
 
 ## Startup: calibrate to current style
@@ -41,7 +41,7 @@ Read all 5 files. Note any patterns not in the reference sections below and upda
 ## Mode A: Create new module
 
 0. **Check the name is legal**: at most one `/` — `<tool>` or `<tool/subtool>`. Deeper names (`aws/s3/ls`) fail the `main_nf_module_granularity` lint check. Flatten to two levels before scaffolding (i.e., `aws/s3ls`).
-1. **Research tool**: Cross-check official docs **and** the command's `--help` output (run it locally if a container is already pulled). Write down **every** mandatory + optional input file, mandatory + optional flag, and **every** output file the tool can produce — the agent will only expose what it documents here. Also capture: Bioconda package name + latest stable version, and the exact command to print the version string.
+1. **Research tool**: Cross-check official docs **and** the command's `--help` output (inside the built image, Container rules step 6). Write down **every** mandatory + optional input file, mandatory + optional flag, and **every** output file the tool can produce — the agent will only expose what it documents here. Also capture: the conda package (bioconda, then conda-forge) or, failing that, the PyPI package + latest stable version, and the exact command to print the version string.
 2. **Determine resource label**: `process_single` → `process_low` → `process_medium` → `process_high` → `process_high_memory` / `process_long` based on known tool requirements
 3. **Scaffold**:
    ```bash
@@ -50,51 +50,35 @@ Read all 5 files. Note any patterns not in the reference sections below and upda
    ```
    - Has meta: `yes`
    - Resource label: from step 2
-   - Bioconda env: use auto-detected if found; otherwise **stop, leave placeholders, and ask user to fill container/conda fields before continuing**
-4. **Populate `environment.yml`**: correct package, prefer bioconda over conda-forge with pinned versions always, minimum deps only
-5. **Resolve container tag** — see rules below
+   - Conda package: use the auto-detected one if found; otherwise go on — you fill `environment.yml` in step 4. Ignore any biocontainers URL the scaffold writes; step 5 replaces it.
+4. **Populate `environment.yml`**: correct package, prefer bioconda over conda-forge, use a `pip:` section only for PyPI-only packages; pinned versions always, minimum deps only
+5. **Build and smoke-test the containers** — see Container rules below
 6. **Populate `main.nf`**: follow rules below
-7. **Create `nextflow.config` if needed**: If the tool requires mandatory `ext.args`, fixed `ext.prefix` settings, or specific process config to run correctly, create a `nextflow.config` at the module root. Study reference modules to see when this is needed.
+7. **Create a module-root `nextflow.config` only when runtime-required**: In the rare case the module cannot run as intended without module-level configuration, create the file and document why it is mandatory. Do not create it for nf-test-only arguments or configuration; those belong in `tests/nextflow.config` and `module_args`.
 
 ## Mode B: Update existing module
 
 Only modify what is explicitly requested:
 - `main.nf` changes: inputs/outputs/script/stub — touch nothing else
-- `environment.yml` changes: update package version only if a newer stable Bioconda release exists (verify via web search). The container directive must then be re-resolved for the new version — you do not hand-edit it. For a Wave module, ask the user to run `nf-core modules bump-versions <tool/subcommand>` (it now resolves Seqera containers) or `nf-core modules containers create <tool/subcommand>`; for a legacy biocontainers module, look up the new quay.io tag per the rules below.
+- `environment.yml` changes: update package version only if a newer stable release exists on its channel or PyPI (verify via web search). Touch the container only when `environment.yml` changes, and then always rebuild it with `nf-core modules containers create <tool/subcommand> --force` (Container rules) — never hand-edit the directive. This also moves a legacy biocontainers module to Seqera containers, as `nf-core modules bump-versions` does.
 
-## Container directive rules
+## Container rules
 
-> **NEVER guess a container URI, and NEVER build Wave containers yourself.**
-> Building containers is the user's action, not yours — it hits the Seqera Wave API, needs their `TOWER_ACCESS_TOKEN`, and writes files you do not own (`.conda-lock/`, the `containers:` block in `meta.yml`).
+Containers are Seqera Wave builds of `environment.yml`, and you make them yourself with `nf-core modules containers create`. **Never type or guess a container URI.**
 
-Canonical form of the directive:
-```
-container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-    ? '<singularity_url>'
-    : '<docker_image>'}"
-```
+1. **Finish `environment.yml` first.** Any mix of conda channels and a `pip:` section works, as on the Seqera Containers site. The images are built from the file's exact content, so any later change to it means rebuilding with `--force`.
+2. **Check the token** with `[ -n "$TOWER_ACCESS_TOKEN" ]` — never print it. The build works without it, but anonymous Wave allows only 25 builds a day and 100 pulls an hour, and one module takes 4 builds; say in the handoff if it was unset.
+3. **Build**, from the modules repo root: `nf-core modules containers create <tool/subcommand>` (`--force` when rebuilding). It takes 1–3 min, builds docker + singularity for linux/amd64 + linux/arm64, rewrites the container directive in `main.nf`, and writes the `meta.yml` `containers:` block and `.conda-lock/`. That block is the only `meta.yml` change you may cause — never edit it by hand. Use this command, not the `wave` CLI: the CLI produces different image tags and none of the metadata lint requires.
+4. **Check** that both directive branches now point at `https://community-cr-prod.seqera.io/...` and `community.wave.seqera.io/library/...`, and that `meta.yml` has a `containers:` block. A failed linux/arm64 build or a missing conda lock file is only a warning (lint still passes); a failed linux/amd64 build is a failure.
+5. **On a failure**, read the Wave error — it is almost always a conda solve problem (wrong package name, version or channel). Fix `environment.yml` and rebuild, at most twice. Still failing: leave `XXXX` placeholders in both directive branches and put the Wave error in the handoff.
+6. **Smoke-test the image** before writing the script block. Use the singularity `https://` URL from the directive (not the `oras://` name in `meta.yml`), or the docker image if only docker is available:
+   ```bash
+   singularity exec <singularity_https_url> sh -c '<version command>; <tool> --help'
+   docker run --rm <docker_image> sh -c '<version command>; <tool> --help'
+   ```
+   This proves the tool is in the image, that your versions `eval` prints a bare version, and that the flags you listed in Mode A step 1 exist.
 
-Two valid registries. **Biocontainers is the default — use it unless told otherwise.** It is what `nf-core modules create` scaffolds (`quay.io/biocontainers/YOUR-TOOL-HERE`), and still the repo majority.
-
-**Default path — biocontainers:**
-
-1. Browse `https://quay.io/repository/biocontainers/<package>?tab=tags`
-2. Find the tag matching the exact version in `environment.yml` (e.g. `1.6.6--pyhdfd78af_0`)
-3. Fill: `'https://depot.galaxyproject.org/singularity/<package>:<tag>'` / `'quay.io/biocontainers/<package>:<tag>'`
-
-No `containers:` block in `meta.yml` is expected or required on this path.
-
-**Opt-in, alternative path — Seqera Wave.** `modules create` now prints it as a follow-up hint. Take it only when the user asks, or when updating a module already on Wave:
-
-1. Leave `XXXX` placeholders in both branches of the directive.
-2. **Stop and ask the user to run** `nf-core modules containers create <tool/subcommand>` from the modules repo root — it fills `main.nf`, writes the `containers:` block in `meta.yml`, and drops conda lock files under the module's `.conda-lock/`.
-3. Resume only after they confirm. Never run it yourself; never hand-write the URIs it would have produced.
-
-It generates a `https://community-cr-prod.seqera.io/docker/registry/v2/...` singularity URL and a `community.wave.seqera.io/library/<pkg>:<version>--<hash>` docker image. Both carry Wave build hashes — unguessable by construction.
-
-Never migrate a module between the two registries unless asked. Once `main.nf` points at `community.wave.seqera.io`, lint additionally demands a `meta.yml` `containers:` block.
-
-**Any uncertainty** (package not on Bioconda, tag not found): placeholders + ask. Never a guess.
+**No conda or PyPI package** (GitHub-only R package, unpackaged script, proprietary binary): there is nothing to build. Leave `XXXX` placeholders in both directive branches and report it — such a module needs a Dockerfile, which is outside this agent.
 
 ## main.nf rules
 
@@ -119,8 +103,9 @@ Never migrate a module between the two registries unless asked. Once `main.nf` p
 When done, report to caller (user or nf-module-manager):
 - Files created/modified with paths
 - Resource label chosen and why
-- Any placeholders left that need manual filling (container, conda env)
-- Whether a root `nextflow.config` was created and why
+- Any container placeholders left, and why (no conda/PyPI package, or the Wave error)
+- Whether `TOWER_ACCESS_TOKEN` was set, and any arm64 or lock-file warnings from the build
+- Whether a root `nextflow.config` was created for a mandatory runtime requirement, and why
 - Anything nf-test-expert or nf-secretary should know about non-obvious outputs or required test configs
 
 ---

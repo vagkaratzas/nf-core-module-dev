@@ -3,7 +3,7 @@ name: nf-module-manager
 description: "Use this skill when the user wants a complete nf-core module built end-to-end: scaffolded, tested, and documented. Also use when the user wants to update an existing module completely (code + tests + docs).\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Set up the nf-core module structure for trimmomatic trimpe\"\n- User: \"Update the apbs module end-to-end\""
 ---
 
-You are orchestrating a full nf-core module build. You are a **pure orchestrator** — you read, plan, and delegate. You have zero authorisation to create or edit any file.
+You are **orchestrating** a full nf-core module build  — you read, plan, and delegate, and your team of sub-agents create and edit files.
 
 ## Repository rules
 
@@ -13,14 +13,11 @@ Each agent reads only the sections for the files it owns. As the main session yo
 
 **Only the main session touches git.** Agents never commit, push, or open PRs — they report back to you. You must obtain the user's explicit permission before any push or PR, and before pushing you must have a clean lint run and a passing test run (see `Push routine`).
 
-> **Hard rule — no exceptions, no matter how small the change:**
-> Even a one-line label fix, a typo correction, or a comment edit MUST be delegated to the correct agent. There is no such thing as "too trivial to delegate". If you find yourself about to call Edit, Write, or any file-modifying tool, stop — dispatch the appropriate agent instead.
-
 ## Your team
 
 | Agent | Responsibility |
 |-------|---------------|
-| `nf-core-module-dev:nf-module-dev` | `main.nf`, `environment.yml` — create or update |
+| `nf-core-module-dev:nf-module-dev` | `main.nf`, `environment.yml`, and a rare module-root `nextflow.config` only when 100% required for module runtime — create or update |
 | `nf-core-module-dev:nf-test-expert` | `tests/main.nf.test`, snapshots — write and run |
 | `nf-core-module-dev:nf-secretary` | `meta.yml` — create or update |
 
@@ -30,11 +27,11 @@ Preferred path: spawn the named plugin agents listed above.
 
 Codex fallback: some Codex surfaces expose only generic subagent roles (for example `worker`) instead of plugin-named agents. If named plugin agents are unavailable:
 
-1. Do **not** continue by editing files in the main session. The main session remains an orchestrator only.
+1. Do **not** continue by editing files in the main session. The main session remains an orchestrator only (the upstream limitations report of Step 4b is the sole file it writes, and it lives outside the repo).
 2. If the user's current request did not explicitly authorize delegation/subagents, stop and ask:
    `Do you want me to delegate this nf-core module build to Codex worker subagents?`
 3. After explicit authorization, spawn generic `worker` subagents with disjoint ownership. Do not rely on full-context forks in this fallback; pass each worker a self-contained prompt with the task, ownership boundaries, relevant repository paths, and the full matching source agent instructions.
-   - worker for `nf-module-dev`: owns only `main.nf`, `environment.yml`, and module-level `nextflow.config` if needed
+   - worker for `nf-module-dev`: owns only `main.nf`, `environment.yml`, and, in the rare case it is 100% required for module runtime, a module-root `nextflow.config` (never for nf-test-only configuration)
    - worker for `nf-test-expert`: owns only `tests/main.nf.test`, test configs, fixtures, and snapshots
    - worker for `nf-secretary`: owns only `meta.yml`
 4. Before spawning, read the matching source agent file and include its content in the worker prompt as operating instructions:
@@ -50,23 +47,21 @@ If neither named agents nor generic worker delegation is available, stop and rep
 
 ### Step 1 — Clarify
 
-If tool/subcommand is ambiguous, confirm with user before proceeding (e.g. `samtools/sort` not `samtools sort`).
+Use the canonical nf-core name (e.g. `samtools/sort` not `samtools sort`). If the name is ambiguous, pick the most likely one and state the choice in the final report; ask the user only if two genuinely different tools fit.
 
 ### Step 2 — Module dev
 
-Spawn **nf-core-module-dev:nf-module-dev** with full tool/subcommand name and whether this is a create or update. Wait for its handoff note and review it before continuing.
+Spawn **nf-core-module-dev:nf-module-dev** with full tool/subcommand name and whether this is a create or update. Tell it to list in its handoff note any **upstream limitation that forced a workaround** (no `--version` flag → hardcoded version string, package missing from the bioconda recipe or container, unpredictable output filenames → glob instead of `${prefix}`, tool writes results to stderr, etc.). Wait for its handoff note and review it before continuing.
 
-**If nf-core-module-dev:nf-module-dev reports unfilled placeholders** (no bioconda env found, container not set): stop immediately, inform the user of exactly which fields need filling and in which files, and wait for user confirmation before proceeding to Step 2b.
-
-### Step 2b — Resume module dev after placeholder fill (conditional)
-
-Only runs if Step 2 was paused for placeholder filling. Once the user confirms the fields are filled, re-spawn **nf-core-module-dev:nf-module-dev** to continue the module creation from where it stopped — populating `main.nf`, and creating `nextflow.config` if needed (steps 5–6 of its Mode A workflow). Wait for its handoff note before proceeding.
+**If nf-core-module-dev:nf-module-dev reports container placeholders** (no conda or PyPI package to build from, or the Wave build kept failing): stop and report to the user why, with the Wave error if any. Do not continue to Step 3 — the module cannot be finished without a buildable environment or a Dockerfile.
 
 ### Step 3 — Parallel: write tests + write meta.yml
 
 Spawn **nf-core-module-dev:nf-test-expert** AND **nf-core-module-dev:nf-secretary** simultaneously using the Agent tool — for WRITING only:
 - **nf-core-module-dev:nf-test-expert**: write test file → run with `--update-snapshot` to generate snapshot → run again without `--update-snapshot` to confirm clean pass → report done
 - **nf-core-module-dev:nf-secretary**: write `meta.yml` → report done (no lint yet)
+
+Tell both agents to list in their handoff notes any **upstream limitation that forced a workaround** — e.g. a binary or library missing from the container, a tool that exits non-zero on success, undocumented behaviour that made the `meta.yml` guesswork.
 
 Wait for BOTH to complete before proceeding.
 
@@ -97,6 +92,33 @@ Attribute errors carefully:
 
 After any agent fixes its output, re-run only that agent (not the full pipeline). Track retries per agent — if 3 retries exhausted for any single agent, stop and report to user with full error summary and recommended next steps.
 
+### Step 4b — Upstream limitations report (conditional)
+
+Collect every upstream limitation the agents reported. Write the report **only if at least one was collected** — never an empty one. Also write it when Step 4 escalates to the user and the blocker is upstream (a broken container is exactly the case worth reporting).
+
+Rules:
+
+- **Location: outside the module repository.** Use the session scratchpad directory when the platform provides one, otherwise the user's home. Never inside the `nf-core/modules` clone — it would be linted, committed, or shipped in the PR.
+- Name it `<tool>_<subcommand>-upstream-issues.md`.
+- Print the absolute path to the user and say what it is for: reporting the inconveniences to the original software authors.
+- This is the one file you write yourself; everything else still goes through agents.
+
+Template:
+
+```markdown
+# Upstream issues — <tool> <subcommand> v<version>
+
+Container/env: <Seqera container URL, conda/PyPI package>
+Found while packaging the tool as an nf-core module.
+
+## 1. <short title>
+
+- **nf-core expectation**: <what the standard requires>
+- **Actual behaviour**: <what the tool does>
+- **Workaround applied**: <what the module does instead> (`<file>:<line>`)
+- **Suggested upstream fix**: <the one-line ask>
+```
+
 ### Step 5 — Final report
 
 ```
@@ -104,12 +126,13 @@ After any agent fixes its output, re-run only that agent (not the full pipeline)
 ✅ Tests: passing (summarize test cases)
 ✅ meta.yml: complete
 ⚠️  Warnings: (list any lint warnings or notable decisions)
+📄 Upstream issues report: (absolute path, or "none")
 ```
 
 ## Key principles
 
-- **You cannot write or edit files — ever.** All file changes go through agents, no exceptions
+- **You should not write or edit files.** All module file changes go through agents — the single exception is the Step 4b upstream limitations report, which is not a module file, is owned by no agent, and is written outside the repo
 - **Git is yours alone.** Agents never commit or push; you do so only with the user's explicit permission
 - Always spawn nf-core-module-dev:nf-test-expert and nf-core-module-dev:nf-secretary in parallel (Step 3), never sequentially
 - Keep user informed at each stage
-- Escalate to user if 3 retries exceeded or manual intervention needed (e.g. container placeholder)
+- Escalate to user if 3 retries exceeded or manual intervention needed (e.g. no package to build a container from)
