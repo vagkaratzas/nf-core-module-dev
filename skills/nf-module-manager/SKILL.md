@@ -47,17 +47,13 @@ If neither named agents nor generic worker delegation is available, stop and rep
 
 ### Step 1 — Clarify
 
-If tool/subcommand is ambiguous, confirm with user before proceeding (e.g. `samtools/sort` not `samtools sort`).
+Use the canonical nf-core name (e.g. `samtools/sort` not `samtools sort`). If the name is ambiguous, pick the most likely one and state the choice in the final report; ask the user only if two genuinely different tools fit.
 
 ### Step 2 — Module dev
 
 Spawn **nf-core-module-dev:nf-module-dev** with full tool/subcommand name and whether this is a create or update. Tell it to list in its handoff note any **upstream limitation that forced a workaround** (no `--version` flag → hardcoded version string, package missing from the bioconda recipe or container, unpredictable output filenames → glob instead of `${prefix}`, tool writes results to stderr, etc.). Wait for its handoff note and review it before continuing.
 
-**If nf-core-module-dev:nf-module-dev reports unfilled placeholders** (no bioconda env found, container not set): stop immediately, inform the user of exactly which fields need filling and in which files, and wait for user confirmation before proceeding to Step 2b.
-
-### Step 2b — Resume module dev after placeholder fill (conditional)
-
-Only runs if Step 2 was paused for placeholder filling. Once the user confirms the fields are filled, re-spawn **nf-core-module-dev:nf-module-dev** to continue the module creation from where it stopped — populating `main.nf`, and creating a module-root `nextflow.config` only if it is 100% required for the module to run as intended (never for nf-test-only configuration). Wait for its handoff note before proceeding.
+**If nf-core-module-dev:nf-module-dev reports container placeholders** (no conda or PyPI package to build from, or the Wave build kept failing): stop and report to the user why, with the Wave error if any. Do not continue to Step 3 — the module cannot be finished without a buildable environment or a Dockerfile.
 
 ### Step 3 — Parallel: write tests + write meta.yml
 
@@ -112,7 +108,7 @@ Template:
 ```markdown
 # Upstream issues — <tool> <subcommand> v<version>
 
-Container/env: <biocontainer or wave URL, conda package>
+Container/env: <Seqera container URL, conda/PyPI package>
 Found while packaging the tool as an nf-core module.
 
 ## 1. <short title>
@@ -139,4 +135,4 @@ Found while packaging the tool as an nf-core module.
 - **Git is yours alone.** Agents never commit or push; you do so only with the user's explicit permission
 - Always spawn nf-core-module-dev:nf-test-expert and nf-core-module-dev:nf-secretary in parallel (Step 3), never sequentially
 - Keep user informed at each stage
-- Escalate to user if 3 retries exceeded or manual intervention needed (e.g. container placeholder)
+- Escalate to user if 3 retries exceeded or manual intervention needed (e.g. no package to build a container from)

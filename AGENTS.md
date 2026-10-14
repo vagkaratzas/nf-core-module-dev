@@ -47,7 +47,7 @@ nf-core-module-dev/
 
 | Agent | Owns | Never touches |
 |-------|------|---------------|
-| `nf-module-dev` | `main.nf`, `environment.yml`, and a module-root `nextflow.config` only when 100% required for runtime | tests, meta.yml |
+| `nf-module-dev` | `main.nf`, `environment.yml`, a module-root `nextflow.config` only when 100% required for runtime, and the Seqera container build (`nf-core modules containers create`, which also writes the `meta.yml` `containers:` block and `.conda-lock/`) | tests, the rest of meta.yml |
 | `nf-test-expert` | `tests/main.nf.test`, snapshots | main.nf, meta.yml |
 | `nf-secretary` | `meta.yml` | main.nf, tests |
 | `nf-module-manager` skill | orchestration; the upstream-issues report (written outside the repo) | all module file writes |

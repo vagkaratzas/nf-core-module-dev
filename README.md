@@ -90,7 +90,7 @@ For targeted work, agents can be invoked directly:
 - **using-nf-core-module-dev** — session-start bootstrap that tells Claude when to reach for each agent
 
 ### Agents
-- **nf-module-dev** — researches tools, scaffolds modules, populates `main.nf` and `environment.yml` following current nf-core style, and creates a module-root `nextflow.config` only when 100% required for runtime behavior. Stops and waits for you if a bioconda/container environment can't be auto-detected.
+- **nf-module-dev** — researches tools, scaffolds modules, populates `main.nf` and `environment.yml` following current nf-core style, and creates a module-root `nextflow.config` only when 100% required for runtime behavior. Builds the module's Seqera containers from `environment.yml` (any conda channel and/or pip) with `nf-core modules containers create` and smoke-tests them; only stops when the tool has no conda or PyPI package.
 - **nf-test-expert** — writes nf-tests calibrated to current community style, generates and verifies snapshots, supports singularity/docker/conda profiles
 - **nf-secretary** — writes and lints `meta.yml`, handles topic-based versions, EDAM ontologies, and all known schema edge cases
 
@@ -98,7 +98,8 @@ For targeted work, agents can be invoked directly:
 
 - [Claude Code](https://claude.ai/code) or Codex CLI
 - A local clone of [nf-core/modules](https://github.com/nf-core/modules)
-- `nf-core` CLI installed and on your PATH
+- `nf-core` CLI ≥ 4.1.0 on your PATH (the dev version is what nf-core/modules CI lints with; `containers create` is still marked beta)
+- `TOWER_ACCESS_TOKEN` exported (a free Seqera Platform token): the agent builds containers on Wave with your quota, and without a token Wave allows only 25 builds a day (4 per module)
 - `nf-test` installed and on your PATH
 - Singularity, Docker, or conda for running tests
 
