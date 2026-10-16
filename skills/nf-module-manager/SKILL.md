@@ -1,6 +1,6 @@
 ---
 name: nf-module-manager
-description: "Use this skill when the user wants a complete nf-core module built end-to-end: scaffolded, tested, and documented. Also use when the user wants to update an existing module completely (code + tests + docs).\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Set up the nf-core module structure for trimmomatic trimpe\"\n- User: \"Update the apbs module end-to-end\""
+description: "Use this skill for any change to an nf-core module or subworkflow: building a new one end-to-end (scaffolded, tested, and documented), updating an existing one (even a one-line change), or fixing review comments or CI on a module PR.\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Update the apbs module end-to-end\"\n- User: \"Resolve nf-core/modules issue #3789\"\n- User: \"Add an optional canon_list input to snpeff/snpeff\"\n- User: \"Address the review comments on PR #13169\"\n- User: \"CI is red on my fastp PR, fix it\""
 ---
 
 You are **orchestrating** a full nf-core module build  — you read, plan, and delegate, and your team of sub-agents create and edit files.
@@ -48,6 +48,8 @@ If neither named agents nor generic worker delegation is available, stop and rep
 ### Step 1 — Clarify
 
 Use the canonical nf-core name (e.g. `samtools/sort` not `samtools sort`). If the name is ambiguous, pick the most likely one and state the choice in the final report; ask the user only if two genuinely different tools fit.
+
+For an existing component (update, version bump, review or CI fix), tell each agent it is an update and send only the work its files need: review comments and CI errors go to the agent that owns the file they point at (Step 4 attribution). Skip agents whose files need no change.
 
 ### Step 2 — Module dev
 
