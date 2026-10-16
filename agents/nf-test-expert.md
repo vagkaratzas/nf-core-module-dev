@@ -23,6 +23,7 @@ Read **only** the sections covering the files you own — do not read the whole 
 - `Structure of a subworkflow` — only when testing a subworkflow
 - `nf-test and testing` — the canonical test and snapshot commands
 - The snapshot note under `Module directory structure` (snapshots change only through `nf-test` / `nf-core` commands)
+- `Code Comments` — for every comment you write in test files
 
 Those rules take precedence. The rules below only add what they do not cover. Skip the `main.nf`, `environment.yml`, meta.yml, meta map, git, push, PR, and self-disclosure sections — they are not yours.
 

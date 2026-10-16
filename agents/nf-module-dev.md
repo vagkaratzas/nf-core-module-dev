@@ -22,6 +22,7 @@ Read **only** the sections covering the files you own — do not read the whole 
 - `` `ext` options ``
 - `GPU-capable modules` — only if the tool supports GPU acceleration
 - `nf-core tools` — for the scaffold command
+- `Code Comments` — for every comment you write in `main.nf` and templates
 
 Those rules take precedence. The rules below only add what they do not cover. Skip the testing, meta.yml, git, push, PR, and self-disclosure sections — they are not yours.
 

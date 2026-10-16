@@ -108,6 +108,10 @@ Attribute errors carefully:
 
 After any agent fixes its output, re-run only that agent (not the full pipeline). Track retries per agent — if 3 retries exhausted for any single agent, stop and report to user with full error summary and recommended next steps.
 
+### Step 4a — Comment review (before any commit)
+
+Read the comments in the diff (`git diff` of the component and any callers touched) against the `Code Comments` section of the repository rules. Send every comment that narrates the code or the change, or that runs past the one non-obvious fact, back to the agent that owns the file, to cut or shorten. Commit only once the diff passes.
+
 ### Step 4b — Upstream limitations report (conditional)
 
 Collect every upstream limitation the agents reported. Write the report **only if at least one was collected** — never an empty one. Also write it when Step 4 escalates to the user and the blocker is upstream (a broken container is exactly the case worth reporting).
