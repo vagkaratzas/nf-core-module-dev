@@ -99,6 +99,9 @@ Containers are Seqera Wave builds of `environment.yml`, and you make them yourse
 - **Stub block**:
   - Mirror the script's `prefix` / output variable declarations and `touch` (or equivalent) every declared output, including optional ones — the linter checks output coverage.
   - For gzipped outputs, do NOT `touch foo.txt.gz` (parsers will fail on the empty file). Use `echo "" | gzip > "${prefix}.txt.gz"` instead.
+  - Create exactly what a real run with the same inputs would create: follow the script's input-dependent branches (e.g. a `.gfa` only for GFA input) and its cardinality (one file per sample when the real run writes one per sample). Never create an output that the real run would not produce for those inputs.
+  - Run the same argument validation as the script, so an invalid `ext.args` value also fails under `-stub`.
+  - Keep output naming identical in both blocks. `script:` variables are not visible in `stub:`, so keep the naming logic short enough to repeat verbatim, and re-check both blocks together after any change to either.
 
 ## Handoff note
 
