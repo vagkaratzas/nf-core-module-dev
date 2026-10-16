@@ -1,5 +1,25 @@
 # Release Notes
 
+## Unreleased
+
+Fixes from the Barcelona 2026 hackathon's agentic module evaluation (15 runs, 13 PRs, 21 reviews):
+
+- **Plugin used for every change:** the bootstrap rule and the `nf-module-manager` description now cover updates, version bumps, review fixes and CI fixes, with issue/PR-style examples. Before, small updates were done directly in Bash
+- `nf-module-manager`:
+    - new Step 3c: for an existing component, find the subworkflows and module tests that use it with one `grep`, have `nf-test-expert` run them and refresh their snapshots, and list pipeline callers in the PR body on interface changes
+    - new Step 4a: comment review of the diff against AGENTS.md `Code Comments`, sending long comments back to the owning agent
+    - branch guard: one branch (and worktree) per task, with the branch and staged paths checked before every commit
+- `nf-test-expert`:
+    - feature-detection rule: every new test must fail without the code it covers. Its snapshot must differ from the existing tests, or a snapshotted boolean must prove the flag reached the tool, and every input branch must be covered
+    - `sanitizeOutput(process.out)` in every test including stubs, `process.success` inside `assertAll` (template layout), no separate versions assertion, `setup` blocks scoped to the test that needs them
+    - strict syntax in test code (`channel`, explicit closure parameters); may update callers' snapshots when the manager asks
+- `nf-module-dev`:
+    - inputs: one tuple per sample, reference data in its own `meta2` tuple, required inputs for databases the tool cannot run without
+    - versions: nf-core standard `// WARN: Version information not provided by tool on CLI...` comment for hardcoded versions; template (R/Python) modules write `versions.yml` with the interpreter and every loaded package
+    - stubs follow the script's input branches, cardinality and validation; output names must not clash with staged inputs; interpolated paths are quoted and `zcat -f` handles maybe-compressed input
+    - reads AGENTS.md `Code Comments` (as does `nf-test-expert`)
+- `nf-secretary`: one EDAM term per format the `pattern` accepts (CSV and bedGraph added to the table), every `ext.args` option of template modules documented in `description`, official links and paper DOIs
+
 ## v1.6.0 — [2026/10/14]
 
 - `nf-module-manager`: new Step 4b — when the upstream software cannot be ported cleanly (no `--version` flag, package missing from the container/conda recipe, unpredictable output names, non-zero exit on success, …), the orchestrator now collects those limitations from the agents' handoff notes and writes an `<tool>_<subcommand>-upstream-issues.md` report for the user to send to the original authors. Each entry states the nf-core expectation, the actual behaviour, the workaround applied (with `file:line`), and the suggested upstream fix. The report is written **outside** the modules clone (session scratchpad) so it is never linted, committed, or shipped in the PR, and its absolute path is printed in the final report. Agent spawn prompts in Steps 2 and 3 now explicitly ask for these limitations, which also covers the Codex generic-worker fallback. This report is the sole carve-out from the orchestrator's no-file-write rule
