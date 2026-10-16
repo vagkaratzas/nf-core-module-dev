@@ -15,11 +15,11 @@ This plugin provides agents and a skill for creating complete nf-core Nextflow m
 
 | Task | What to use |
 |------|-------------|
-| Build a full module end-to-end (main.nf + tests + meta.yml) | `nf-module-manager` skill |
+| Any module or subworkflow change: new module, update, review or CI fix | `nf-module-manager` skill |
 | Create or update main.nf / environment.yml only | `nf-module-dev` agent |
 | Write or fix nf-tests / snapshots | `nf-test-expert` agent |
 | Create or fix meta.yml | `nf-secretary` agent |
 
 ## Key rule
 
-For end-to-end module work, ALWAYS invoke the `nf-module-manager` skill — never invoke the three agents manually in sequence yourself.
+For any change to an nf-core module or subworkflow — a new module, a small update, a version bump, a review fix or a CI fix — ALWAYS invoke the `nf-module-manager` skill. Never do the work directly with shell commands, and never invoke the three agents manually in sequence yourself. Requests phrased as an issue or PR ("resolve nf-core/modules issue #N", "address the review comments on PR #N") count.

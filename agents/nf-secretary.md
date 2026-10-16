@@ -63,10 +63,12 @@ Read all 5. Note any structural patterns that differ from the reference sections
 - `licence`: block form preferred (`- "MIT"`)
 - `identifier`: `""`, if tool not on biotools, never omit
 - `doi`: OMIT entirely if no DOI — do NOT set to `""` or `null`
+- Template modules (R/Python scripts driven by `ext.args`): the module `description` lists every option the script accepts, with its default and any place it differs from the tool's own default. The PR body is not documentation.
 
 ### `tools` block
 - MUST list every tool the module invokes, even if they share a single bioconda package.
 - Each tool entry MUST set `args_id` to the matching `$args` variable from `main.nf` — `$args` for the first piped/invoked tool, `$args2` for the second, `$args3` for the third, etc. (numbering follows pipe position, matching the rule in `nf-module-dev`).
+- Links come from the official source: the Bioconductor page or `git.bioconductor.org` for Bioconductor packages (never the `github.com/cran/...` mirror), the project's own docs otherwise. `doi` is the paper's DOI; a package DOI (e.g. `10.18129/B9.bioc.*`) is not a substitute when a paper exists.
 
 ### `containers` block
 
@@ -186,7 +188,7 @@ Documented identically to regular outputs — just add "Optional." to the descri
 
 Always keep the format name as a comment after the EDAM URL.
 
-**Coverage rule — every file entry, every input AND output, gets ontologies populated.** Do not write `ontologies: []` on the first file and then skip the rest, and do not assume only the primary output needs terms. The linter accepts `[]` only as a last resort.
+**Coverage rule — every file entry, every input AND output, gets ontologies populated, with one term per format its `pattern` accepts** (e.g. `*.{tsv,csv}` gets both TSV and CSV). Do not write `ontologies: []` on the first file and then skip the rest, and do not assume only the primary output needs terms. The linter accepts `[]` only as a last resort.
 
 **Lookup procedure — exhaust these before settling for `ontologies: []`:**
 
@@ -203,6 +205,8 @@ Always keep the format name as a comment after the EDAM URL.
 | FASTA | `http://edamontology.org/format_1929` |
 | FASTQ | `http://edamontology.org/format_1930` |
 | TSV | `http://edamontology.org/format_3475` |
+| CSV | `http://edamontology.org/format_3752` |
+| bedGraph | `http://edamontology.org/format_3583` |
 | JSON / JSONL | `http://edamontology.org/format_3464` |
 | VCF | `http://edamontology.org/format_3989` |
 | mmCIF | `http://edamontology.org/format_1477` |

@@ -22,6 +22,7 @@ Read **only** the sections covering the files you own — do not read the whole 
 - `` `ext` options ``
 - `GPU-capable modules` — only if the tool supports GPU acceleration
 - `nf-core tools` — for the scaffold command
+- `Code Comments` — for every comment you write in `main.nf` and templates
 
 Those rules take precedence. The rules below only add what they do not cover. Skip the testing, meta.yml, git, push, PR, and self-disclosure sections — they are not yours.
 
@@ -84,19 +85,26 @@ Containers are Seqera Wave builds of `environment.yml`, and you make them yourse
 
 - **Inputs**:
   - All file inputs (mandatory + optional) belong in the input channel — never via `ext.args`. Document every optional input you found during research; do not silently drop any.
-  - **Prefer a single tuple for all inputs where possible**: `tuple val(meta), path(reads), path(reference), path(index)` is preferred over multiple separate channels. Only split into additional channels when inputs have genuinely different cardinalities (e.g. a per-sample input vs. a single shared reference used across all samples).
+  - **One tuple per sample's files**: everything that belongs to one sample goes in one tuple, e.g. `tuple val(meta), path(reads), path(reads_index)`, rather than in separate channels.
+  - **Reference data gets its own tuple**: data shared across samples (databases, indexes, genomes, annotation) goes in a separate `tuple val(meta2), path(db)`, so pipelines don't have to `combine` the same file into every sample.
+  - **Databases the tool needs are inputs**: if the tool cannot run correctly without a database, make that input required. Don't rely on a database bundled in a container or downloaded at runtime, and don't mark an input optional when real runs fail without it.
 - **Outputs**:
   - Document every optional output the tool can produce; expose each as a named emit (see Reference: main.nf style patterns for the `optional: true` syntax).
   - Named output channels for all meaningful outputs + always emit a `versions` topic channel — see Reference: versions output for the canonical pattern and rules.
   - Output paths: use `path("${prefix}.ext")` whenever the tool names its output after the input (the common case). Only fall back to a glob `path("*.ext")` when the output filename genuinely cannot be predicted from the prefix (e.g. the tool appends an unpredictable suffix). Using a glob when `${prefix}` would work is incorrect — it breaks the linter's `correct_meta_outputs` check and produces non-deterministic staging.
   - Prefer compressed formats: `*.fastq.gz` over `*.fastq`, `*.bam` over `*.sam`. Use UNIX pipes to avoid intermediate writes: `gzip -cdf $input | tool | gzip > $output`.
+  - **No name clashes with inputs**: with the default prefix (`meta.id`), no output or intermediate file may have the same name as a staged input. Check the names upstream modules commonly produce (`<id>_1.fastq.gz`, `<id>_assembly.fa`, `<id>.vcf`). Writing `> ${prefix}.fa` when the input may itself be `${prefix}.fa` truncates the upstream file through the symlink. Use a distinct suffix, or rely on the repo's input/output name guard and say which inputs trigger it.
 - **Script body**:
   - No hardcoded params — use `$task.cpus`, `ext.args`, `ext.args2` etc.
   - Use forced redirection `2>|` instead of `2>` (nf-core enables noclobber).
+  - Quote every interpolated path and value that may contain spaces: `-o "${prefix}.pretext"`, `-canonList "${canon_list}"`. For optionally compressed input, use `zcat -f` (or `gzip -cdf`) rather than branching on the `.gz` suffix, which misses `.bgz` and other names.
   - Inline scripts up to ~20 lines are fine; anything longer belongs in `templates/<module>.<ext>` and the script block becomes `template '<module>.<ext>'`.
 - **Stub block**:
   - Mirror the script's `prefix` / output variable declarations and `touch` (or equivalent) every declared output, including optional ones — the linter checks output coverage.
   - For gzipped outputs, do NOT `touch foo.txt.gz` (parsers will fail on the empty file). Use `echo "" | gzip > "${prefix}.txt.gz"` instead.
+  - Create exactly what a real run with the same inputs would create: follow the script's input-dependent branches (e.g. a `.gfa` only for GFA input) and its cardinality (one file per sample when the real run writes one per sample). Never create an output that the real run would not produce for those inputs.
+  - Run the same argument validation as the script, so an invalid `ext.args` value also fails under `-stub`.
+  - Keep output naming identical in both blocks. `script:` variables are not visible in `stub:`, so keep the naming logic short enough to repeat verbatim, and re-check both blocks together after any change to either.
 
 ## Handoff note
 
@@ -131,11 +139,12 @@ Rules:
 - `topic: versions` — NO quotes around `versions` (unlike the string `'versions'` in the old path-based approach).
 - The emitted version string MUST be bare numeric (`1.0.0`) — no `v` prefix, no tool name, no commit hash suffix. Strip any prefix with `sed`/`awk` inside the `eval`.
 - Each tool in a multi-tool module needs its own `versions_<tool>` emit channel.
-- For tools with no CLI version flag, hardcode and comment why:
+- For tools with no CLI version flag, hardcode the version under the nf-core standard comment, word for word (as in `bigslice/bigslice`). Only do this after checking `--version`, `-v`, `version` and `--help` in the image:
   ```nextflow
-  // hardcoded: tool has no --version flag
+  // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
   tuple val("${task.process}"), val('toolname'), val('1.2.3'), topic: versions, emit: versions_toolname
   ```
+- **Template modules** (`template 'x.R'` / `template 'x.py'`): `eval` outputs do not work for non-bash templates, so the template writes `versions.yml` and `main.nf` declares `path "versions.yml", emit: versions, topic: versions`. List the interpreter and **every package the script loads**, not only the main one, under their conda names, e.g. `r-base`, `bioconductor-edger` and `bioconductor-limma`, as `limma/differential` does. The stub writes the same keys.
 
 ## Reference: resource labels
 

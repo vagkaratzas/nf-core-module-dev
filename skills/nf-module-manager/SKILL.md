@@ -1,6 +1,6 @@
 ---
 name: nf-module-manager
-description: "Use this skill when the user wants a complete nf-core module built end-to-end: scaffolded, tested, and documented. Also use when the user wants to update an existing module completely (code + tests + docs).\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Set up the nf-core module structure for trimmomatic trimpe\"\n- User: \"Update the apbs module end-to-end\""
+description: "Use this skill for any change to an nf-core module or subworkflow: building a new one end-to-end (scaffolded, tested, and documented), updating an existing one (even a one-line change), or fixing review comments or CI on a module PR.\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Update the apbs module end-to-end\"\n- User: \"Resolve nf-core/modules issue #3789\"\n- User: \"Add an optional canon_list input to snpeff/snpeff\"\n- User: \"Address the review comments on PR #13169\"\n- User: \"CI is red on my fastp PR, fix it\""
 ---
 
 You are **orchestrating** a full nf-core module build  — you read, plan, and delegate, and your team of sub-agents create and edit files.
@@ -12,6 +12,8 @@ The nf-core/modules repository rules live in `AGENTS.md` at the root of that rep
 Each agent reads only the sections for the files it owns. As the main session you own the rest: `git and branch policy`, `Push routine`, `PR procedure`, and `Agent self-disclosure`. Read those.
 
 **Only the main session touches git.** Agents never commit, push, or open PRs — they report back to you. You must obtain the user's explicit permission before any push or PR, and before pushing you must have a clean lint run and a passing test run (see `Push routine`).
+
+**Branch guard.** Work on one branch per task, in its own worktree whenever other sessions may use the same clone (`git worktree add ../modules-<task> -b <branch> origin/master`). Before every commit, check that `git branch --show-current` is this task's branch and that `git diff --cached --name-only` lists only this component and the callers from Step 3c. Anything else: stop and ask.
 
 ## Your team
 
@@ -49,6 +51,8 @@ If neither named agents nor generic worker delegation is available, stop and rep
 
 Use the canonical nf-core name (e.g. `samtools/sort` not `samtools sort`). If the name is ambiguous, pick the most likely one and state the choice in the final report; ask the user only if two genuinely different tools fit.
 
+For an existing component (update, version bump, review or CI fix), tell each agent it is an update and send only the work its files need: review comments and CI errors go to the agent that owns the file they point at (Step 4 attribution). Skip agents whose files need no change, but always run Step 3c.
+
 ### Step 2 — Module dev
 
 Spawn **nf-core-module-dev:nf-module-dev** with full tool/subcommand name and whether this is a create or update. Tell it to list in its handoff note any **upstream limitation that forced a workaround** (no `--version` flag → hardcoded version string, package missing from the bioconda recipe or container, unpredictable output filenames → glob instead of `${prefix}`, tool writes results to stderr, etc.). Wait for its handoff note and review it before continuing.
@@ -71,6 +75,20 @@ Once nf-core-module-dev:nf-test-expert confirms the snapshot is generated, instr
 
 Reason: `nf-core modules lint` checks for `test_snapshot_exists` — lint will fail if the snapshot file isn't present yet. This is a sequencing dependency, not a meta.yml error.
 
+### Step 3c — Callers (existing components only)
+
+Skip this step for a brand-new component. For any change to a component that already exists on `master`, find everything that uses it, from the modules repo root:
+
+```bash
+c=<tool>/<subcommand>   # or <tool>
+grep -rlE "modules/nf-core/$c(/main(\.nf)?)?['\"]|tag \"$c\"" modules/nf-core subworkflows/nf-core \
+  --include=main.nf --include=main.nf.test | grep -v "^modules/nf-core/$c/"
+```
+
+This finds subworkflows that `include` the module and other modules' tests that run it in a `setup` block. Send the list to **nf-core-module-dev:nf-test-expert** to run each caller's tests and update the snapshots whose output legitimately changed. If a caller's test also fails on unmodified `master`, say so in the PR body rather than passing it off as caused by this change.
+
+If the change alters the interface (inputs, outputs, emit names, or default behaviour), also search the nf-core pipelines, e.g. `gh search code "<PROCESS_NAME>" --owner nf-core`, and list every caller in the PR body. Never write "no callers" without running both searches.
+
 ### Step 4 — Error resolution (max 3 retries)
 
 Attribute errors carefully:
@@ -91,6 +109,10 @@ Attribute errors carefully:
 - Lint errors or schema validation failures
 
 After any agent fixes its output, re-run only that agent (not the full pipeline). Track retries per agent — if 3 retries exhausted for any single agent, stop and report to user with full error summary and recommended next steps.
+
+### Step 4a — Comment review (before any commit)
+
+Read the comments in the diff (`git diff` of the component and any callers touched) against the `Code Comments` section of the repository rules. Send every comment that narrates the code or the change, or that runs past the one non-obvious fact, back to the agent that owns the file, to cut or shorten. Commit only once the diff passes.
 
 ### Step 4b — Upstream limitations report (conditional)
 
@@ -124,6 +146,7 @@ Found while packaging the tool as an nf-core module.
 ```
 ✅ Module files: main.nf, environment.yml (list paths)
 ✅ Tests: passing (summarize test cases)
+✅ Callers: tests run for (list), or "new component"
 ✅ meta.yml: complete
 ⚠️  Warnings: (list any lint warnings or notable decisions)
 📄 Upstream issues report: (absolute path, or "none")
