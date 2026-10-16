@@ -102,7 +102,14 @@ nf-test test /path/to/main.nf.test --profile=+singularity --verbose --tag "<test
 
 - Structure: `nextflow_process { name, script, process, tags, [setup], tests }`
 - Tags: always `"modules"`, `"modules_nfcore"`, tool-family tag, `tool/subcommand` tag — **plus one tag per module used in any `setup` block** (e.g. if setup runs `MMSEQS_CREATEDB`, add `tag "mmseqs"` and `tag "mmseqs/createdb"` at the top of the `nextflow_process` block). These dependency tags are mandatory — they cause upstream module changes to re-trigger this module's tests in CI.
-- Assertions: `assert process.success` then `assertAll({ assert snapshot(sanitizeOutput(process.out)).match() })`
+- Assertions, as in the nf-core template — `process.success` inside `assertAll` so every failure is reported together:
+  ```groovy
+  assertAll(
+      { assert process.success },
+      { assert snapshot(sanitizeOutput(process.out)).match() }
+  )
+  ```
+- **Every test snapshots `sanitizeOutput(process.out)`, the stub test included** — never raw `process.out`, which stores each channel twice (numeric keys plus emit names). Do not add a separate versions assertion (`path(process.out.versions...)` or a parsed `versions.yml`); `sanitizeOutput` already snapshots the versions channels.
 - **Stub test is mandatory** — every module MUST have at least one `options "-stub"` test that exercises the stub block and snapshots the (empty) output structure plus versions. The stub is the minimum CI safety net (assertion priority covered below).
 - **Unsupported profiles**: if a module legitimately cannot run under one of the standard profiles (e.g. tool only ships a Docker image, no conda recipe), add the `<tool>/<subtool>` entry — alphabetically — to `.github/skip_nf_test.json` so CI skips that profile cleanly instead of failing.
 
@@ -174,6 +181,8 @@ setup {
 ```
 
 Reference outputs with `UPSTREAM_MODULE.out.channel_name`. Chains can be multi-level.
+
+Put a `setup` block inside the `test(...)` that needs it. A file-level `setup` runs before every test, so use it only when every test consumes its output.
 
 Cannot `run()` the same process being tested in a setup block — Nextflow throws "A process named 'X' is already defined". Use static test data files instead.
 
