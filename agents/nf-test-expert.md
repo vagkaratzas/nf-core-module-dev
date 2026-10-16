@@ -85,6 +85,7 @@ It is essential to default `module_args` to `''` for when the nf-tests are not p
 5. **Write test**: Follow current style from calibration + reference sections below
 6. **Run with `--update-snapshot`**: Generate snapshot
 7. **Run without `--update-snapshot`**: Confirm clean pass
+7b. **Check feature detection**: apply the Feature-detection rule below to every test you added or changed
 8. **Iterate**: If flaky, downgrade assertion priority (see below), document why
 
 ## Test commands
@@ -148,6 +149,13 @@ Then, for **each** exempted channel, add back the strongest content guarantee th
 `.contains(...)` returns a boolean, which snapshots cleanly. Pick a line the tool always emits — never one whose presence is incidental.
 
 **Empty-output rule**: Real (non-stub) tests must NOT snapshot md5sums of empty files. If a snapshot captures a `d41d8cd98f00b204e9800998ecf8427e` (empty-file MD5), the tool produced no output — fix the test data or disregard that channel output completely.
+
+**Feature-detection rule**: every test must be able to fail when the code it covers is removed.
+
+- A test added for a new option, input or code branch must give a snapshot that differs from every existing test. If the data cannot make the output differ (e.g. a VCF that overlaps no gene, a genome with no short contigs), pick other data, or snapshot a boolean that proves the flag reached the tool, e.g. `path(process.out.log[0][1]).text.contains('--readFilesCommand zcat')` or a check on the task's `.command.sh`.
+- Cover every input branch the script has: compressed and plain input, each accepted format (GFA and FASTA), each mode (build and update), and optional inputs both given and empty.
+- Choose data that can tell the modes apart: reads that all map, or all fail to map, cannot test a mapped/unmapped filter.
+- Before handing off, compare the md5s of each new snapshot entry with the other tests in the file, and report any test whose snapshot is identical to another one.
 
 ## Reference: topic-based versions
 
