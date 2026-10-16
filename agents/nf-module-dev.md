@@ -96,6 +96,7 @@ Containers are Seqera Wave builds of `environment.yml`, and you make them yourse
 - **Script body**:
   - No hardcoded params — use `$task.cpus`, `ext.args`, `ext.args2` etc.
   - Use forced redirection `2>|` instead of `2>` (nf-core enables noclobber).
+  - Quote every interpolated path and value that may contain spaces: `-o "${prefix}.pretext"`, `-canonList "${canon_list}"`. For optionally compressed input, use `zcat -f` (or `gzip -cdf`) rather than branching on the `.gz` suffix, which misses `.bgz` and other names.
   - Inline scripts up to ~20 lines are fine; anything longer belongs in `templates/<module>.<ext>` and the script block becomes `template '<module>.<ext>'`.
 - **Stub block**:
   - Mirror the script's `prefix` / output variable declarations and `touch` (or equivalent) every declared output, including optional ones — the linter checks output coverage.
