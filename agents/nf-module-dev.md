@@ -133,11 +133,12 @@ Rules:
 - `topic: versions` — NO quotes around `versions` (unlike the string `'versions'` in the old path-based approach).
 - The emitted version string MUST be bare numeric (`1.0.0`) — no `v` prefix, no tool name, no commit hash suffix. Strip any prefix with `sed`/`awk` inside the `eval`.
 - Each tool in a multi-tool module needs its own `versions_<tool>` emit channel.
-- For tools with no CLI version flag, hardcode and comment why:
+- For tools with no CLI version flag, hardcode the version under the nf-core standard comment, word for word (as in `bigslice/bigslice`). Only do this after checking `--version`, `-v`, `version` and `--help` in the image:
   ```nextflow
-  // hardcoded: tool has no --version flag
+  // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
   tuple val("${task.process}"), val('toolname'), val('1.2.3'), topic: versions, emit: versions_toolname
   ```
+- **Template modules** (`template 'x.R'` / `template 'x.py'`): `eval` outputs do not work for non-bash templates, so the template writes `versions.yml` and `main.nf` declares `path "versions.yml", emit: versions, topic: versions`. List the interpreter and **every package the script loads**, not only the main one, under their conda names, e.g. `r-base`, `bioconductor-edger` and `bioconductor-limma`, as `limma/differential` does. The stub writes the same keys.
 
 ## Reference: resource labels
 
