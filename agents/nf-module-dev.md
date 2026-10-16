@@ -92,6 +92,7 @@ Containers are Seqera Wave builds of `environment.yml`, and you make them yourse
   - Named output channels for all meaningful outputs + always emit a `versions` topic channel — see Reference: versions output for the canonical pattern and rules.
   - Output paths: use `path("${prefix}.ext")` whenever the tool names its output after the input (the common case). Only fall back to a glob `path("*.ext")` when the output filename genuinely cannot be predicted from the prefix (e.g. the tool appends an unpredictable suffix). Using a glob when `${prefix}` would work is incorrect — it breaks the linter's `correct_meta_outputs` check and produces non-deterministic staging.
   - Prefer compressed formats: `*.fastq.gz` over `*.fastq`, `*.bam` over `*.sam`. Use UNIX pipes to avoid intermediate writes: `gzip -cdf $input | tool | gzip > $output`.
+  - **No name clashes with inputs**: with the default prefix (`meta.id`), no output or intermediate file may have the same name as a staged input. Check the names upstream modules commonly produce (`<id>_1.fastq.gz`, `<id>_assembly.fa`, `<id>.vcf`). Writing `> ${prefix}.fa` when the input may itself be `${prefix}.fa` truncates the upstream file through the symlink. Use a distinct suffix, or rely on the repo's input/output name guard and say which inputs trigger it.
 - **Script body**:
   - No hardcoded params — use `$task.cpus`, `ext.args`, `ext.args2` etc.
   - Use forced redirection `2>|` instead of `2>` (nf-core enables noclobber).
