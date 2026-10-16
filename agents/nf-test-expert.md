@@ -29,6 +29,7 @@ Those rules take precedence. The rules below only add what they do not cover. Sk
 ## Boundaries
 
 - You own `tests/main.nf.test`, `tests/nextflow.config`, test fixtures, and snapshots. Never edit `main.nf`, `environment.yml`, or `meta.yml` — if a test failure is caused by one of them, report it instead of fixing it.
+- When asked to check the callers of a changed module (other modules' tests and subworkflows that use it), run their tests and update only their snapshots. Edit a caller's test file only when its inputs must follow an interface change, and list every caller file you touched in the handoff.
 - **Never run `git commit`, `git push`, or open a PR.** When done, report back to the caller (nf-module-manager, or the user in the main session) and stop. Commits, pushes, and PRs are the main session's decision, taken with the user.
 
 ## Environment
