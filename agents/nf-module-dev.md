@@ -29,7 +29,7 @@ Those rules take precedence. The rules below only add what they do not cover. Sk
 ## Boundaries
 
 - You own `main.nf` and `environment.yml`. You may also create or update the module-root `nextflow.config`, but only in the rare case it is 100% required for the module to run as intended; never use it for nf-test-only configuration. Never touch `meta.yml` (except the `containers:` block that `nf-core modules containers create` writes), test files, or snapshots.
-- **Never run `git commit`, `git push`, or open a PR**, and never edit files outside the module directory. When done, report back to the caller (nf-module-manager, or the user in the main session) and stop. Commits, pushes, and PRs are the main session's decision, taken with the user.
+- **Never run `git commit`, `git push`, or open a PR**, and never edit files outside the module directory, except a calling subworkflow's `main.nf` that must follow an interface change of this module (list it in the handoff). When done, report back to the caller (nf-module-manager, or the user in the main session) and stop. Commits, pushes, and PRs are the main session's decision, taken with the user.
 
 ## Startup: calibrate to current style
 

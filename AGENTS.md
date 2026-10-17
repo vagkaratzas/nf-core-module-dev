@@ -38,14 +38,14 @@ nf-core-module-dev/
 │       └── SKILL.md             ← end-to-end orchestration workflow
 ```
 
-Routing lives in the descriptions only (no session-start hook): `nf-module-manager` for new modules and whole-module updates; small changes are done directly or by the agent that owns the file.
+Routing lives in the descriptions only (no session-start hook): `nf-module-manager` for new modules and whole-module updates; small changes are done directly or by the agent that owns the file, and `nf-test-expert` then checks the callers of any changed existing component.
 
 ## Agent responsibilities
 
 | Agent | Owns | Never touches |
 |-------|------|---------------|
-| `nf-module-dev` | `main.nf`, `environment.yml`, a module-root `nextflow.config` only when 100% required for runtime, and the Seqera container build (`nf-core modules containers create`, which also writes the `meta.yml` `containers:` block and `.conda-lock/`) | tests, the rest of meta.yml |
-| `nf-test-expert` | `tests/main.nf.test`, snapshots; callers' snapshots (and their tests only for an interface change) when the manager asks | main.nf, meta.yml |
+| `nf-module-dev` | `main.nf`, `environment.yml`, a module-root `nextflow.config` only when 100% required for runtime, and the Seqera container build (`nf-core modules containers create`, which also writes the `meta.yml` `containers:` block and `.conda-lock/`); a calling subworkflow's `main.nf` when an interface change requires it | tests, the rest of meta.yml |
+| `nf-test-expert` | `tests/main.nf.test`, snapshots; the callers check of a changed existing component: callers' snapshots, and their tests only for an interface change | main.nf, meta.yml |
 | `nf-secretary` | `meta.yml` | main.nf, tests |
 | `nf-module-manager` skill | orchestration; the upstream-issues report (written outside the repo) | all module file writes |
 

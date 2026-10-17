@@ -30,7 +30,7 @@ Those rules take precedence. The rules below only add what they do not cover. Sk
 ## Boundaries
 
 - You own `tests/main.nf.test`, `tests/nextflow.config`, test fixtures, and snapshots. Never edit `main.nf`, `environment.yml`, or `meta.yml` — if a test failure is caused by one of them, report it instead of fixing it.
-- When asked to check the callers of a changed module (other modules' tests and subworkflows that use it), run their tests and update only their snapshots. Edit a caller's test file only when its inputs must follow an interface change, and list every caller file you touched in the handoff.
+- After a change to the code of a component that already exists on `master`, check its callers (`Reference: callers`): run their tests and update only their snapshots. Edit a caller's test file only when its inputs must follow an interface change, and list every caller found and every caller file you touched in the handoff. A calling subworkflow's `main.nf` is not yours: report it if it must change.
 - **Never run `git commit`, `git push`, or open a PR.** When done, report back to the caller (nf-module-manager, or the user in the main session) and stop. Commits, pushes, and PRs are the main session's decision, taken with the user.
 
 ## Environment
@@ -187,6 +187,19 @@ Reference outputs with `UPSTREAM_MODULE.out.channel_name`. Chains can be multi-l
 Put a `setup` block inside the `test(...)` that needs it. A file-level `setup` runs before every test, so use it only when every test consumes its output.
 
 Cannot `run()` the same process being tested in a setup block — Nextflow throws "A process named 'X' is already defined". Use static test data files instead.
+
+## Reference: callers
+
+From the modules repo root, set `c` to the component's path under `modules/nf-core/` or `subworkflows/nf-core/`:
+
+```bash
+c=samtools/sort   # replace with the changed component
+name=$(echo "$c" | tr '/a-z' '_A-Z')   # SAMTOOLS_SORT
+grep -rlE "\b$name\b|tag \"(subworkflows/)?$c\"" modules/nf-core subworkflows/nf-core \
+  --include='*.nf' --include='*.nf.test' | grep -v -e "^modules/nf-core/$c/" -e "^subworkflows/nf-core/$c/"
+```
+
+The process or workflow name matches every `include` and `setup` run, whatever relative path they use; the tag matches tests that declare the component as a dependency. For a `main.nf` hit, run the tests next to it. Never report "no callers" without running this.
 
 ## Reference: known pitfalls
 

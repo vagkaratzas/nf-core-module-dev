@@ -1,6 +1,6 @@
 ---
 name: nf-module-manager
-description: "Use this skill to build a new nf-core module or subworkflow end-to-end (scaffolded, tested, and documented), or to update an existing one end-to-end across main.nf, tests and meta.yml. Not for small or single-file changes: make those directly, or call the agent that owns the file (nf-module-dev, nf-test-expert, nf-secretary).\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Update the apbs module end-to-end\""
+description: "Use this skill to build a new nf-core module or subworkflow end-to-end (scaffolded, tested, and documented), or to update an existing one end-to-end across main.nf, tests and meta.yml. Not for small or single-file changes: make those directly, or call the agent that owns the file (nf-module-dev, nf-test-expert, nf-secretary); after a change to an existing component's code, also have nf-test-expert check its callers.\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Update the apbs module end-to-end\""
 ---
 
 You are **orchestrating** a full nf-core module build  — you read, plan, and delegate, and your team of sub-agents create and edit files.
@@ -51,7 +51,7 @@ If neither named agents nor generic worker delegation is available, stop and rep
 
 Use the canonical nf-core name (e.g. `samtools/sort` not `samtools sort`). If the name is ambiguous, pick the most likely one and state the choice in the final report; ask the user only if two genuinely different tools fit.
 
-For an existing component (update, version bump, review or CI fix), tell each agent it is an update and send only the work its files need: review comments and CI errors go to the agent that owns the file they point at (Step 4 attribution). Skip agents whose files need no change, but always run Step 3c.
+For an existing component, tell each agent it is an update and send only the work its files need: review comments and CI errors go to the agent that owns the file they point at (Step 4 attribution). Skip agents whose files need no change, but always run Step 3c.
 
 ### Step 2 — Module dev
 
@@ -77,17 +77,16 @@ Reason: `nf-core modules lint` checks for `test_snapshot_exists` — lint will f
 
 ### Step 3c — Callers (existing components only)
 
-Skip this step for a brand-new component. For any change to a component that already exists on `master`, find everything that uses it, from the modules repo root:
+Skip this step for a brand-new component. For any change to a component that already exists on `master`, ask **nf-core-module-dev:nf-test-expert** to run its callers check (`Reference: callers`): it finds the subworkflows and module tests that use the component, runs their tests, and updates the snapshots whose output legitimately changed. If a calling subworkflow's `main.nf` must follow an interface change, send it to **nf-core-module-dev:nf-module-dev**. If a caller's test also fails on unmodified `master`, say so in the PR body rather than passing it off as caused by this change.
+
+If the change alters the interface (inputs, outputs, emit names, or default behaviour), also list in the PR body every nf-core pipeline that uses it (replace `SAMTOOLS_SORT` with the component's process or workflow name):
 
 ```bash
-c=<tool>/<subcommand>   # or <tool>
-grep -rlE "modules/nf-core/$c(/main(\.nf)?)?['\"]|tag \"$c\"" modules/nf-core subworkflows/nf-core \
-  --include=main.nf --include=main.nf.test | grep -v "^modules/nf-core/$c/"
+gh search code SAMTOOLS_SORT --owner nf-core --limit 1000 --json repository \
+  --jq '.[].repository.nameWithOwner' | sort -u | grep -vx nf-core/modules
 ```
 
-This finds subworkflows that `include` the module and other modules' tests that run it in a `setup` block. Send the list to **nf-core-module-dev:nf-test-expert** to run each caller's tests and update the snapshots whose output legitimately changed. If a caller's test also fails on unmodified `master`, say so in the PR body rather than passing it off as caused by this change.
-
-If the change alters the interface (inputs, outputs, emit names, or default behaviour), also search the nf-core pipelines, e.g. `gh search code "<PROCESS_NAME>" --owner nf-core`, and list every caller in the PR body. Never write "no callers" without running both searches.
+Never write "no callers" without running both searches.
 
 ### Step 4 — Error resolution (max 3 retries)
 
@@ -99,6 +98,7 @@ Attribute errors carefully:
 - Missing or malformed versions emission
 - Incorrect conda/container directives
 - Any structural issue in `main.nf` or `environment.yml`
+- A calling subworkflow's `main.nf` that no longer matches the changed interface
 
 **Send back to nf-core-module-dev:nf-test-expert** if the error involves:
 - Test data paths or test configuration
