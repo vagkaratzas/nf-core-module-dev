@@ -1,6 +1,6 @@
 ---
 name: nf-module-manager
-description: "Use this skill when the user wants a complete nf-core module built end-to-end: scaffolded, tested, and documented. Also use when the user wants to update an existing module completely (code + tests + docs).\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Set up the nf-core module structure for trimmomatic trimpe\"\n- User: \"Update the apbs module end-to-end\""
+description: "Use this skill to build a new nf-core module or subworkflow end-to-end (scaffolded, tested, and documented), or to update an existing one end-to-end across main.nf, tests and meta.yml. Not for small or single-file changes: make those directly, or call the agent that owns the file (nf-module-dev, nf-test-expert, nf-secretary); after a change to an existing component's code, also have nf-test-expert check its callers.\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Update the apbs module end-to-end\""
 ---
 
 You are **orchestrating** a full nf-core module build  — you read, plan, and delegate, and your team of sub-agents create and edit files.
@@ -12,6 +12,8 @@ The nf-core/modules repository rules live in `AGENTS.md` at the root of that rep
 Each agent reads only the sections for the files it owns. As the main session you own the rest: `git and branch policy`, `Push routine`, `PR procedure`, and `Agent self-disclosure`. Read those.
 
 **Only the main session touches git.** Agents never commit, push, or open PRs — they report back to you. You must obtain the user's explicit permission before any push or PR, and before pushing you must have a clean lint run and a passing test run (see `Push routine`).
+
+**Branch guard.** Work on one branch per task, in its own worktree whenever other sessions may use the same clone: fetch the remote that points at nf-core/modules (`upstream` on a fork, otherwise `origin`), then `git worktree add ../modules-<task> -b <branch> <remote>/master`. Give every agent the worktree's absolute path as its modules repo. Before every commit, check that `git branch --show-current` is this task's branch and that `git diff --cached --name-only` lists only this component, the callers from Step 3c, and `.github/skip_nf_test.json` if nf-test-expert added the component to it. Anything else: stop and ask.
 
 ## Your team
 
@@ -49,6 +51,21 @@ If neither named agents nor generic worker delegation is available, stop and rep
 
 Use the canonical nf-core name (e.g. `samtools/sort` not `samtools sort`). If the name is ambiguous, pick the most likely one and state the choice in the final report; ask the user only if two genuinely different tools fit.
 
+For an existing component, tell each agent it is an update and send only the work its files need: review comments and CI errors go to the agent that owns the file they point at (Step 4 attribution). Skip agents whose files need no change, but always run Step 3c.
+
+### Step 1b — Package check (new modules)
+
+Before spawning any agent for a new module, check that the tool has a release on bioconda, conda-forge or PyPI. `environment.yml` must install it from one of them, otherwise no container can be built. The package name can differ from the tool name:
+
+```bash
+pkg=samtools   # replace with the tool's package name
+for u in https://api.anaconda.org/package/bioconda/$pkg https://api.anaconda.org/package/conda-forge/$pkg https://pypi.org/pypi/$pkg/json; do
+  echo "$(curl -s -o /dev/null -w '%{http_code}' "$u") $u"
+done
+```
+
+`200` means released, `404` means not. If all three return `404` and searching anaconda.org and pypi.org finds no package under another name, stop and report to the user: the tool has no bioconda, conda-forge or PyPI release, so nf-core cannot build its containers, and it must be published on one of them first. Do not spawn any agent.
+
 ### Step 2 — Module dev
 
 Spawn **nf-core-module-dev:nf-module-dev** with full tool/subcommand name and whether this is a create or update. Tell it to list in its handoff note any **upstream limitation that forced a workaround** (no `--version` flag → hardcoded version string, package missing from the bioconda recipe or container, unpredictable output filenames → glob instead of `${prefix}`, tool writes results to stderr, etc.). Wait for its handoff note and review it before continuing.
@@ -71,6 +88,10 @@ Once nf-core-module-dev:nf-test-expert confirms the snapshot is generated, instr
 
 Reason: `nf-core modules lint` checks for `test_snapshot_exists` — lint will fail if the snapshot file isn't present yet. This is a sequencing dependency, not a meta.yml error.
 
+### Step 3c — Callers (existing components only)
+
+Skip this step for a brand-new component. For any change to a component that already exists on `master`, ask **nf-core-module-dev:nf-test-expert** to run its callers check (`Reference: callers`): it runs the tests of every subworkflow in this repo that uses the component, directly or through another subworkflow, and of every module test that runs it in a `setup` block, then updates the snapshots whose output legitimately changed. If a calling subworkflow's `main.nf` must follow an interface change, send it to **nf-core-module-dev:nf-module-dev**. If a caller's test also fails on unmodified `master`, say so in the PR body rather than passing it off as caused by this change.
+
 ### Step 4 — Error resolution (max 3 retries)
 
 Attribute errors carefully:
@@ -81,6 +102,7 @@ Attribute errors carefully:
 - Missing or malformed versions emission
 - Incorrect conda/container directives
 - Any structural issue in `main.nf` or `environment.yml`
+- A calling subworkflow's `main.nf` that no longer matches the changed interface
 
 **Send back to nf-core-module-dev:nf-test-expert** if the error involves:
 - Test data paths or test configuration
@@ -91,6 +113,10 @@ Attribute errors carefully:
 - Lint errors or schema validation failures
 
 After any agent fixes its output, re-run only that agent (not the full pipeline). Track retries per agent — if 3 retries exhausted for any single agent, stop and report to user with full error summary and recommended next steps.
+
+### Step 4a — Comment review (before any commit)
+
+Read the comments in the diff (`git diff` of the component and any callers touched) against the `Code Comments` section of the repository rules. Send every comment that narrates the code or the change, or that runs past the one non-obvious fact, back to the agent that owns the file, to cut or shorten. Commit only once the diff passes.
 
 ### Step 4b — Upstream limitations report (conditional)
 
@@ -124,6 +150,7 @@ Found while packaging the tool as an nf-core module.
 ```
 ✅ Module files: main.nf, environment.yml (list paths)
 ✅ Tests: passing (summarize test cases)
+✅ Callers: tests run for (list), or "new component"
 ✅ meta.yml: complete
 ⚠️  Warnings: (list any lint warnings or notable decisions)
 📄 Upstream issues report: (absolute path, or "none")

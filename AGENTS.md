@@ -17,8 +17,7 @@ claude plugin install nf-core-module-dev@vagkaratzas
 
 ```
 agents/          ← three specialist agents (source of truth for both platforms)
-skills/          ← nf-module-manager orchestrator + session bootstrap
-hooks/           ← Claude Code session-start hook
+skills/          ← nf-module-manager orchestrator
 .claude-plugin/  ← Claude Code plugin manifest + shared marketplace catalog
 .codex-plugin/   ← Codex plugin manifest
 ```
@@ -35,20 +34,18 @@ nf-core-module-dev/
 │   ├── nf-test-expert.md        ← writes and runs nf-tests + snapshots
 │   └── nf-secretary.md          ← writes and lints meta.yml
 ├── skills/
-│   ├── nf-module-manager/
-│   │   └── SKILL.md             ← end-to-end orchestration workflow
-│   └── using-nf-core-module-dev/
-│       └── SKILL.md             ← session-start bootstrap
-├── hooks/
-│   └── hooks.json               ← injects bootstrap skill at session start for Claude
+│   └── nf-module-manager/
+│       └── SKILL.md             ← end-to-end orchestration workflow
 ```
+
+Routing lives in the descriptions only (no session-start hook): `nf-module-manager` for new modules and whole-module updates; small changes are done directly or by the agent that owns the file, and `nf-test-expert` then checks the callers of any changed existing component.
 
 ## Agent responsibilities
 
 | Agent | Owns | Never touches |
 |-------|------|---------------|
-| `nf-module-dev` | `main.nf`, `environment.yml`, a module-root `nextflow.config` only when 100% required for runtime, and the Seqera container build (`nf-core modules containers create`, which also writes the `meta.yml` `containers:` block and `.conda-lock/`) | tests, the rest of meta.yml |
-| `nf-test-expert` | `tests/main.nf.test`, snapshots | main.nf, meta.yml |
+| `nf-module-dev` | `main.nf`, `environment.yml`, a module-root `nextflow.config` only when 100% required for runtime, and the Seqera container build (`nf-core modules containers create`, which also writes the `meta.yml` `containers:` block and `.conda-lock/`); a calling subworkflow's `main.nf` when an interface change requires it | tests, the rest of meta.yml |
+| `nf-test-expert` | `tests/main.nf.test`, snapshots; the callers check of a changed existing component: callers' snapshots, and their tests only for an interface change | main.nf, meta.yml |
 | `nf-secretary` | `meta.yml` | main.nf, tests |
 | `nf-module-manager` skill | orchestration; the upstream-issues report (written outside the repo) | all module file writes |
 
@@ -65,7 +62,7 @@ The reference sections replace the old `agent-memory/` directory. When a runtime
 
 ## Multi-platform support
 
-- **Claude Code**: full plugin with agents, skills, and session hook through the Claude marketplace.
+- **Claude Code**: full plugin with agents and skills through the Claude marketplace.
 - **Codex**: uses the shared marketplace catalog in `.claude-plugin/marketplace.json` plus the source-controlled Codex manifest in `.codex-plugin/plugin.json`.
 
 Agents must remain self-contained so their instructions can be reused by Codex generic worker subagents when plugin-named agents are unavailable.
@@ -114,7 +111,3 @@ scripts/bump-version.sh --check
 # Bump to a new version
 scripts/bump-version.sh 1.1.0
 ```
-
-## Hooks
-
-`hooks/session-start` reads `skills/using-nf-core-module-dev/SKILL.md` and injects it into the session context via `hookSpecificOutput.additionalContext`. `hooks/run-hook.cmd` is a cross-platform wrapper (Unix + Windows), and `hooks/hooks.json` invokes it via a repo-relative path so the shared hook config is not tied to Claude-specific environment variables.
