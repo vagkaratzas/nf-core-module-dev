@@ -62,7 +62,7 @@ The reference sections replace the old `agent-memory/` directory. When a runtime
 
 ## Multi-platform support
 
-- **Claude Code**: full plugin with agents, skills, and session hook through the Claude marketplace.
+- **Claude Code**: full plugin with agents and skills through the Claude marketplace.
 - **Codex**: uses the shared marketplace catalog in `.claude-plugin/marketplace.json` plus the source-controlled Codex manifest in `.codex-plugin/plugin.json`.
 
 Agents must remain self-contained so their instructions can be reused by Codex generic worker subagents when plugin-named agents are unavailable.
