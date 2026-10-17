@@ -30,7 +30,7 @@ claude plugin marketplace add vagkaratzas/nf-core-module-dev
 claude plugin install nf-core-module-dev@vagkaratzas
 ```
 
-Then start a new session. The plugin bootstraps automatically — you get the full experience: the three specialists plus the `nf-module-manager` orchestrator.
+Then start a new session — you get the three specialists plus the `nf-module-manager` orchestrator.
 
 ### Codex
 
@@ -87,7 +87,6 @@ For targeted work, agents can be invoked directly:
 
 ### Skills
 - **nf-module-manager** — end-to-end module orchestration with parallel agents and automatic error attribution
-- **using-nf-core-module-dev** — session-start bootstrap that tells Claude when to reach for each agent
 
 ### Agents
 - **nf-module-dev** — researches tools, scaffolds modules, populates `main.nf` and `environment.yml` following current nf-core style, and creates a module-root `nextflow.config` only when 100% required for runtime behavior. Builds the module's Seqera containers from `environment.yml` (any conda channel and/or pip) with `nf-core modules containers create` and smoke-tests them; only stops when the tool has no conda or PyPI package.
