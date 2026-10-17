@@ -6,6 +6,7 @@ Fixes from the Barcelona 2026 hackathon's agentic module evaluation (15 runs, 13
 
 - **Removed the session-start hook** and the `using-nf-core-module-dev` bootstrap skill. They added context to every session in every project. Routing now lives in the descriptions: `nf-module-manager` runs for new modules and whole-module updates; small changes are done directly or by the agent that owns the file
 - `nf-module-manager`:
+    - new Step 1b: before spawning any agent for a new module, check that the tool has a bioconda, conda-forge or PyPI release; if not, stop and report to the user, since no container can be built without one
     - new Step 3c: for an existing component, `nf-test-expert` runs the tests of the subworkflows (direct and indirect) and module tests that use it and refreshes their snapshots; `nf-module-dev` updates a calling subworkflow's `main.nf` on interface changes
     - new Step 4a: comment review of the diff against AGENTS.md `Code Comments`, sending long comments back to the owning agent
     - branch guard: one branch (and worktree) per task, with the branch and staged paths checked before every commit. The worktree branches from the freshly fetched nf-core remote (`upstream` on a fork), and its path is passed to every agent, which now takes the modules repo from its request first

@@ -53,6 +53,19 @@ Use the canonical nf-core name (e.g. `samtools/sort` not `samtools sort`). If th
 
 For an existing component, tell each agent it is an update and send only the work its files need: review comments and CI errors go to the agent that owns the file they point at (Step 4 attribution). Skip agents whose files need no change, but always run Step 3c.
 
+### Step 1b — Package check (new modules)
+
+Before spawning any agent for a new module, check that the tool has a release on bioconda, conda-forge or PyPI. `environment.yml` must install it from one of them, otherwise no container can be built. The package name can differ from the tool name:
+
+```bash
+pkg=samtools   # replace with the tool's package name
+for u in https://api.anaconda.org/package/bioconda/$pkg https://api.anaconda.org/package/conda-forge/$pkg https://pypi.org/pypi/$pkg/json; do
+  echo "$(curl -s -o /dev/null -w '%{http_code}' "$u") $u"
+done
+```
+
+`200` means released, `404` means not. If all three return `404` and searching anaconda.org and pypi.org finds no package under another name, stop and report to the user: the tool has no bioconda, conda-forge or PyPI release, so nf-core cannot build its containers, and it must be published on one of them first. Do not spawn any agent.
+
 ### Step 2 — Module dev
 
 Spawn **nf-core-module-dev:nf-module-dev** with full tool/subcommand name and whether this is a create or update. Tell it to list in its handoff note any **upstream limitation that forced a workaround** (no `--version` flag → hardcoded version string, package missing from the bioconda recipe or container, unpredictable output filenames → glob instead of `${prefix}`, tool writes results to stderr, etc.). Wait for its handoff note and review it before continuing.
