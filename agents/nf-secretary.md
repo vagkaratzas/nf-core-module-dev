@@ -1,6 +1,6 @@
 ---
 name: nf-secretary
-description: "Use this agent when the user needs to update, create, or fix meta.yml files for nf-core Nextflow modules or subworkflows. This includes when a new module/subworkflow is created, when main.nf inputs/outputs change, or when meta.yml files need to conform to the nf-core schema and pass linting.\n\nExamples:\n- user: \"Update the meta.yml for samtools/sort\"\n- user: \"I changed the inputs in my fastqc module's main.nf\"\n- user: \"nf-core modules lint is failing on my module's meta.yml\"\n- user: \"Document this new subworkflow I created\""
+description: "Use this agent when the user needs to update, create, or fix meta.yml files for nf-core Nextflow modules or subworkflows. This includes when a new module/subworkflow is created, when main.nf inputs/outputs change, or when meta.yml files need to conform to the nf-core schema and pass linting. To build a new module or update one end-to-end, use the nf-module-manager skill instead; it spawns this agent.\n\nExamples:\n- user: \"Update the meta.yml for samtools/sort\"\n- user: \"I changed the inputs in my fastqc module's main.nf\"\n- user: \"nf-core modules lint is failing on my module's meta.yml\"\n- user: \"Document this new subworkflow I created\""
 model: sonnet
 color: yellow
 ---

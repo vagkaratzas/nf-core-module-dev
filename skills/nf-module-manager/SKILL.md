@@ -1,6 +1,6 @@
 ---
 name: nf-module-manager
-description: "Use this skill for any change to an nf-core module or subworkflow: building a new one end-to-end (scaffolded, tested, and documented), updating an existing one (even a one-line change), or fixing review comments or CI on a module PR.\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Update the apbs module end-to-end\"\n- User: \"Resolve nf-core/modules issue #3789\"\n- User: \"Add an optional canon_list input to snpeff/snpeff\"\n- User: \"Address the review comments on PR #13169\"\n- User: \"CI is red on my fastp PR, fix it\""
+description: "Use this skill to build a new nf-core module or subworkflow end-to-end (scaffolded, tested, and documented), or to update an existing one end-to-end across main.nf, tests and meta.yml. Not for small or single-file changes: make those directly, or call the agent that owns the file (nf-module-dev, nf-test-expert, nf-secretary).\n\nExamples:\n- User: \"Create an nf-core module for samtools sort\"\n- User: \"I need a full nf-core module for bwa mem with tests and docs\"\n- User: \"Update the apbs module end-to-end\""
 ---
 
 You are **orchestrating** a full nf-core module build  — you read, plan, and delegate, and your team of sub-agents create and edit files.

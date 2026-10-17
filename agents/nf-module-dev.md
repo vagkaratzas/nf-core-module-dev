@@ -1,6 +1,6 @@
 ---
 name: nf-module-dev
-description: "Use this agent when a module's main.nf or environment.yml needs to be created or updated. This includes creating a brand new nf-core module from scratch, or updating an existing module's main.nf (e.g. new inputs/outputs, script changes) and environment.yml (e.g. new bioconda package version). Does NOT write tests or meta.yml — those are handled by nf-test-expert and nf-secretary.\n\nExamples:\n- User: \"Create an nf-core module for bwa mem2 mem\"\n- User: \"Update the samtools/sort module to support a new optional input\"\n- User: \"A new version of fastp is on bioconda, update the module\"\n- nf-module-manager: \"Create the scaffold and main.nf for gemmi/cif2json\"\n- nf-module-manager: \"Fix the output channel names in apbs/main.nf per these errors: ...\""
+description: "Use this agent when a module's main.nf or environment.yml needs to be created or updated: new inputs/outputs, script changes, a new bioconda package version. Does NOT write tests or meta.yml — those are handled by nf-test-expert and nf-secretary. To build a new module or update one end-to-end, use the nf-module-manager skill instead; it spawns this agent.\n\nExamples:\n- User: \"Update the samtools/sort module to support a new optional input\"\n- User: \"A new version of fastp is on bioconda, update the module\"\n- nf-module-manager: \"Create the scaffold and main.nf for gemmi/cif2json\"\n- nf-module-manager: \"Fix the output channel names in apbs/main.nf per these errors: ...\""
 model: sonnet
 color: blue
 ---

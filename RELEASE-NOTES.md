@@ -4,7 +4,7 @@
 
 Fixes from the Barcelona 2026 hackathon's agentic module evaluation (15 runs, 13 PRs, 21 reviews):
 
-- **Plugin used for every change:** the bootstrap rule and the `nf-module-manager` description now cover updates, version bumps, review fixes and CI fixes, with issue/PR-style examples. Before, small updates were done directly in Bash
+- **Removed the session-start hook** and the `using-nf-core-module-dev` bootstrap skill. They added context to every session in every project. Routing now lives in the descriptions: `nf-module-manager` runs for new modules and whole-module updates; small changes are done directly or by the agent that owns the file
 - `nf-module-manager`:
     - new Step 3c: for an existing component, find the subworkflows and module tests that use it with one `grep`, have `nf-test-expert` run them and refresh their snapshots, and list pipeline callers in the PR body on interface changes
     - new Step 4a: comment review of the diff against AGENTS.md `Code Comments`, sending long comments back to the owning agent

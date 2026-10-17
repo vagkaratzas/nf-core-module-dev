@@ -17,8 +17,7 @@ claude plugin install nf-core-module-dev@vagkaratzas
 
 ```
 agents/          ← three specialist agents (source of truth for both platforms)
-skills/          ← nf-module-manager orchestrator + session bootstrap
-hooks/           ← Claude Code session-start hook
+skills/          ← nf-module-manager orchestrator
 .claude-plugin/  ← Claude Code plugin manifest + shared marketplace catalog
 .codex-plugin/   ← Codex plugin manifest
 ```
@@ -35,13 +34,11 @@ nf-core-module-dev/
 │   ├── nf-test-expert.md        ← writes and runs nf-tests + snapshots
 │   └── nf-secretary.md          ← writes and lints meta.yml
 ├── skills/
-│   ├── nf-module-manager/
-│   │   └── SKILL.md             ← end-to-end orchestration workflow
-│   └── using-nf-core-module-dev/
-│       └── SKILL.md             ← session-start bootstrap
-├── hooks/
-│   └── hooks.json               ← injects bootstrap skill at session start for Claude
+│   └── nf-module-manager/
+│       └── SKILL.md             ← end-to-end orchestration workflow
 ```
+
+Routing lives in the descriptions only (no session-start hook): `nf-module-manager` for new modules and whole-module updates; small changes are done directly or by the agent that owns the file.
 
 ## Agent responsibilities
 
@@ -114,7 +111,3 @@ scripts/bump-version.sh --check
 # Bump to a new version
 scripts/bump-version.sh 1.1.0
 ```
-
-## Hooks
-
-`hooks/session-start` reads `skills/using-nf-core-module-dev/SKILL.md` and injects it into the session context via `hookSpecificOutput.additionalContext`. `hooks/run-hook.cmd` is a cross-platform wrapper (Unix + Windows), and `hooks/hooks.json` invokes it via a repo-relative path so the shared hook config is not tied to Claude-specific environment variables.
