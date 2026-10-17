@@ -77,16 +77,7 @@ Reason: `nf-core modules lint` checks for `test_snapshot_exists` — lint will f
 
 ### Step 3c — Callers (existing components only)
 
-Skip this step for a brand-new component. For any change to a component that already exists on `master`, ask **nf-core-module-dev:nf-test-expert** to run its callers check (`Reference: callers`): it finds the subworkflows and module tests that use the component, runs their tests, and updates the snapshots whose output legitimately changed. If a calling subworkflow's `main.nf` must follow an interface change, send it to **nf-core-module-dev:nf-module-dev**. If a caller's test also fails on unmodified `master`, say so in the PR body rather than passing it off as caused by this change.
-
-If the change alters the interface (inputs, outputs, emit names, or default behaviour), also list in the PR body every nf-core pipeline that uses it (replace `SAMTOOLS_SORT` with the component's process or workflow name):
-
-```bash
-gh search code SAMTOOLS_SORT --owner nf-core --limit 1000 --json repository \
-  --jq '.[].repository.nameWithOwner' | sort -u | grep -vx nf-core/modules
-```
-
-Never write "no callers" without running both searches.
+Skip this step for a brand-new component. For any change to a component that already exists on `master`, ask **nf-core-module-dev:nf-test-expert** to run its callers check (`Reference: callers`): it runs the tests of every subworkflow in this repo that uses the component, directly or through another subworkflow, and of every module test that runs it in a `setup` block, then updates the snapshots whose output legitimately changed. If a calling subworkflow's `main.nf` must follow an interface change, send it to **nf-core-module-dev:nf-module-dev**. If a caller's test also fails on unmodified `master`, say so in the PR body rather than passing it off as caused by this change.
 
 ### Step 4 — Error resolution (max 3 retries)
 

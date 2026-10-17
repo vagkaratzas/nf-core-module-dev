@@ -190,16 +190,14 @@ Cannot `run()` the same process being tested in a setup block — Nextflow throw
 
 ## Reference: callers
 
-From the modules repo root, set `c` to the component's path under `modules/nf-core/` or `subworkflows/nf-core/`:
+From the modules repo root, pass the changed component's `main.nf` (module or subworkflow; `samtools/sort` is the example):
 
 ```bash
-c=samtools/sort   # replace with the changed component
-name=$(echo "$c" | tr '/a-z' '_A-Z')   # SAMTOOLS_SORT
-grep -rlE "\b$name\b|tag \"(subworkflows/)?$c\"" modules/nf-core subworkflows/nf-core \
-  --include='*.nf' --include='*.nf.test' | grep -v -e "^modules/nf-core/$c/" -e "^subworkflows/nf-core/$c/"
+nf-test test modules/nf-core/samtools/sort/main.nf --related-tests --follow-dependencies --profile=+singularity
+nf-test test <path/to/failing/main.nf.test> --profile=+singularity --update-snapshot
 ```
 
-The process or workflow name matches every `include` and `setup` run, whatever relative path they use; the tag matches tests that declare the component as a dependency. For a `main.nf` hit, run the tests next to it. Never report "no callers" without running this.
+The first command follows the `include` statements, so it runs the tests of every subworkflow that uses the component, directly or through another subworkflow, and of every module test that runs it in `setup`, plus the component's own tests. Add `--dry-run` to only list them. Then update the snapshot of each failing test whose output legitimately changed (second command); fix the test or report the failure otherwise. Never report "no callers" without running the first command.
 
 ## Reference: known pitfalls
 

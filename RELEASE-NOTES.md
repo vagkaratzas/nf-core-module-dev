@@ -1,18 +1,18 @@
 # Release Notes
 
-## Unreleased
+## v1.7.0 — [2026/10/17]
 
 Fixes from the Barcelona 2026 hackathon's agentic module evaluation (15 runs, 13 PRs, 21 reviews):
 
 - **Removed the session-start hook** and the `using-nf-core-module-dev` bootstrap skill. They added context to every session in every project. Routing now lives in the descriptions: `nf-module-manager` runs for new modules and whole-module updates; small changes are done directly or by the agent that owns the file
 - `nf-module-manager`:
-    - new Step 3c: for an existing component, `nf-test-expert` finds the subworkflows and module tests that use it, runs them and refreshes their snapshots; `nf-module-dev` updates a calling subworkflow's `main.nf` on interface changes, and the pipeline callers (`gh search code --limit 1000`, one line per repository) go in the PR body
+    - new Step 3c: for an existing component, `nf-test-expert` runs the tests of the subworkflows (direct and indirect) and module tests that use it and refreshes their snapshots; `nf-module-dev` updates a calling subworkflow's `main.nf` on interface changes
     - new Step 4a: comment review of the diff against AGENTS.md `Code Comments`, sending long comments back to the owning agent
     - branch guard: one branch (and worktree) per task, with the branch and staged paths checked before every commit. The worktree branches from the freshly fetched nf-core remote (`upstream` on a fork), and its path is passed to every agent, which now takes the modules repo from its request first
 - `nf-test-expert`:
     - feature-detection rule: every new test must fail without the code it covers. Its snapshot must differ from the existing tests, or a snapshotted boolean must prove the flag reached the tool, and every input branch must be covered
     - `sanitizeOutput(process.out)` in every test including stubs, `process.success` inside `assertAll` (template layout), no separate versions assertion, `setup` blocks scoped to the test that needs them
-    - strict syntax in test code (`channel`, explicit closure parameters); new `Reference: callers` search (by process or workflow name and dependency tag, so subworkflows and relative `include` paths are found), run after any change to an existing component, also outside the manager
+    - strict syntax in test code (`channel`, explicit closure parameters); new `Reference: callers` check (`nf-test test <component>/main.nf --related-tests --follow-dependencies`, then `--update-snapshot` on the legitimately changed ones), run after any change to an existing component, also outside the manager
 - `nf-module-dev`:
     - inputs: one tuple per sample, reference data in its own `meta2` tuple, required inputs for databases the tool cannot run without
     - versions: nf-core standard `// WARN: Version information not provided by tool on CLI...` comment for hardcoded versions; template (R/Python) modules write `versions.yml` with the interpreter and every loaded package
