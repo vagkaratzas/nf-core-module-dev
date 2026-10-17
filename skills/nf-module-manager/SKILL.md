@@ -13,7 +13,7 @@ Each agent reads only the sections for the files it owns. As the main session yo
 
 **Only the main session touches git.** Agents never commit, push, or open PRs — they report back to you. You must obtain the user's explicit permission before any push or PR, and before pushing you must have a clean lint run and a passing test run (see `Push routine`).
 
-**Branch guard.** Work on one branch per task, in its own worktree whenever other sessions may use the same clone (`git worktree add ../modules-<task> -b <branch> origin/master`). Before every commit, check that `git branch --show-current` is this task's branch and that `git diff --cached --name-only` lists only this component and the callers from Step 3c. Anything else: stop and ask.
+**Branch guard.** Work on one branch per task, in its own worktree whenever other sessions may use the same clone: fetch the remote that points at nf-core/modules (`upstream` on a fork, otherwise `origin`), then `git worktree add ../modules-<task> -b <branch> <remote>/master`. Give every agent the worktree's absolute path as its modules repo. Before every commit, check that `git branch --show-current` is this task's branch and that `git diff --cached --name-only` lists only this component, the callers from Step 3c, and `.github/skip_nf_test.json` if nf-test-expert added the component to it. Anything else: stop and ask.
 
 ## Your team
 

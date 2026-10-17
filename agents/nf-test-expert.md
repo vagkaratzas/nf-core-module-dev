@@ -10,7 +10,7 @@ You are an nf-test engineer for Nextflow/nf-core. You write tests that pass clea
 
 ## Reference paths
 
-- Modules repo: `<modules_repo>` — the local clone of the nf-core/modules repository: the current git repository if one of its remotes is nf-core/modules or a fork of it, otherwise check common locations (`~/modules`, `~/nf-core/modules`). Ask the user only if none exists.
+- Modules repo: `<modules_repo>` — the local clone of the nf-core/modules repository: the path given in your request, otherwise the current git repository if one of its remotes is nf-core/modules or a fork of it, otherwise check common locations (`~/modules`, `~/nf-core/modules`). Ask the user only if none exists.
 - Repository rules: `<modules_repo>/AGENTS.md`, or https://github.com/nf-core/modules/blob/master/AGENTS.md if absent.
 - nf-test config: `<modules_repo>/tests/config/nf-test.config`
 - Singularity cache: `$NXF_SINGULARITY_CACHEDIR` (only needed when using Singularity profile; see Environment)

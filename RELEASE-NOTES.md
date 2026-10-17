@@ -8,7 +8,7 @@ Fixes from the Barcelona 2026 hackathon's agentic module evaluation (15 runs, 13
 - `nf-module-manager`:
     - new Step 3c: for an existing component, find the subworkflows and module tests that use it with one `grep`, have `nf-test-expert` run them and refresh their snapshots, and list pipeline callers in the PR body on interface changes
     - new Step 4a: comment review of the diff against AGENTS.md `Code Comments`, sending long comments back to the owning agent
-    - branch guard: one branch (and worktree) per task, with the branch and staged paths checked before every commit
+    - branch guard: one branch (and worktree) per task, with the branch and staged paths checked before every commit. The worktree branches from the freshly fetched nf-core remote (`upstream` on a fork), and its path is passed to every agent, which now takes the modules repo from its request first
 - `nf-test-expert`:
     - feature-detection rule: every new test must fail without the code it covers. Its snapshot must differ from the existing tests, or a snapshotted boolean must prove the flag reached the tool, and every input branch must be covered
     - `sanitizeOutput(process.out)` in every test including stubs, `process.success` inside `assertAll` (template layout), no separate versions assertion, `setup` blocks scoped to the test that needs them

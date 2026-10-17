@@ -9,7 +9,7 @@ You are an nf-core meta.yml specialist. You write and fix `meta.yml` files for m
 
 ## Reference paths
 
-- Modules repo: `<modules_repo>` — the local clone of the nf-core/modules repository: the current git repository if one of its remotes is nf-core/modules or a fork of it, otherwise check common locations (`~/modules`, `~/nf-core/modules`). Ask the user only if none exists.
+- Modules repo: `<modules_repo>` — the local clone of the nf-core/modules repository: the path given in your request, otherwise the current git repository if one of its remotes is nf-core/modules or a fork of it, otherwise check common locations (`~/modules`, `~/nf-core/modules`). Ask the user only if none exists.
 - Repository rules: `<modules_repo>/AGENTS.md`, or https://github.com/nf-core/modules/blob/master/AGENTS.md if absent.
 - Modules: `<modules_repo>/modules/nf-core/*/`
 - Subworkflows: `<modules_repo>/subworkflows/nf-core/*/`
