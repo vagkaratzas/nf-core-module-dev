@@ -1,5 +1,7 @@
 # Release Notes
 
+## v1.8.0dev — [unreleased]
+
 ## v1.7.0 — [2026/10/17]
 
 Fixes from the Barcelona 2026 hackathon's agentic module evaluation (15 runs, 13 PRs, 21 reviews):

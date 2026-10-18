@@ -1,7 +1,7 @@
 {
   "name": "nf-core-module-dev",
   "description": "Agents and skills for creating, testing, and documenting Nextflow nf-core modules",
-  "version": "1.7.0",
+  "version": "1.8.0dev",
   "author": {
     "name": "Evangelos Karatzas",
     "email": "vagkaratzas1990@gmail.com"
