@@ -51,7 +51,7 @@ Only when `mcp__savvy-progress__progress` is among your tools (Claude Code with 
 
 - After Step 1b, call it with `title` (the component name), `phase: "delegate"` and `tasks`: one per planned agent run, `tier: "medium"`, `after` for dependencies. Each task title must be the exact `description` you later pass to the Agent tool, e.g. `Module dev`, `Write tests`, `Write meta.yml`, `Lint meta.yml`, `Callers check`. A retry reuses its task's title.
 - Call it again with `done` each time you accept a handoff, with `phase: "review"` in Steps 4–4a, and with `finished: true` at Step 5.
-- End every agent prompt with: "Progress reporting: before any other work, call `mcp__savvy-progress__step` with `total` (your plan in 3-8 steps) and `done: 0`; call it again with `done` and a few-word `note` as each step finishes."
+- Agents report their own steps per the `Progress reporting` section of their definitions; do not repeat it in agent prompts.
 
 ## Workflow
 
