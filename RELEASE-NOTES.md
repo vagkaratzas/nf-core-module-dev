@@ -2,6 +2,8 @@
 
 ## v1.8.0dev — [unreleased]
 
+- `nf-module-manager`: branch guard now passes agents the worktree's absolute path as printed by `git worktree list`. Resolving `../modules-<task>` by hand could send agents to a directory that does not exist
+
 ## v1.7.0 — [2026/10/17]
 
 Fixes from the Barcelona 2026 hackathon's agentic module evaluation (15 runs, 13 PRs, 21 reviews):
