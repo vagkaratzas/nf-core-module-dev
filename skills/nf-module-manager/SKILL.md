@@ -45,6 +45,14 @@ Codex fallback: some Codex surfaces expose only generic subagent roles (for exam
 
 If neither named agents nor generic worker delegation is available, stop and report that this platform cannot safely run the end-to-end manager. Do not silently switch to doing all file edits locally.
 
+## Progress bar (optional)
+
+Only when `mcp__savvy-progress__progress` is among your tools (Claude Code with the savvy-progress mod); otherwise skip this section.
+
+- After Step 1b, call it with `title` (the component name), `phase: "delegate"` and `tasks`: one per planned agent run, `tier: "medium"`, `after` for dependencies. Each task title must be the exact `description` you later pass to the Agent tool, e.g. `Module dev`, `Write tests`, `Write meta.yml`, `Lint meta.yml`, `Callers check`. A retry reuses its task's title.
+- Call it again with `done` each time you accept a handoff, with `phase: "review"` in Steps 4–4a, and with `finished: true` at Step 5.
+- End every agent prompt with: "Progress reporting: before any other work, call `mcp__savvy-progress__step` with `total` (your plan in 3-8 steps) and `done: 0`; call it again with `done` and a few-word `note` as each step finishes."
+
 ## Workflow
 
 ### Step 1 — Clarify

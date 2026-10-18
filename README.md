@@ -19,7 +19,7 @@ Each agent is a specialist:
 | `nf-test-expert` | nf-tests, snapshots |
 | `nf-secretary` | `meta.yml`, linting |
 
-Because the `nf-module-manager` runs as a **skill** in your main session (not a hidden sub-agent), you can watch every step as it happens.
+Because the `nf-module-manager` runs as a **skill** in your main session (not a hidden sub-agent), you can watch every step as it happens. With the [savvy-progress](https://github.com/JohnnyVizz/claude-kit/tree/main/plugins/savvy-progress) mod installed (Claude Code only), the plan and each agent's steps show as progress bars.
 
 ## Installation
 

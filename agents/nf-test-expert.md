@@ -1,7 +1,7 @@
 ---
 name: nf-test-expert
 description: "Use this agent when the user asks to write, create, generate, or fix an nf-test for a Nextflow or nf-core module, subworkflow, or pipeline. Also use when asked to generate or update test snapshots, debug failing nf-tests, or review nf-test files. To build a new nf-core module or update one end-to-end, use the nf-module-manager skill instead; it spawns this agent.\n\nExamples:\n- User: \"Write an nf-test for the new fastqc module\"\n- User: \"Create tests for my subworkflow in modules/subworkflows/nf-core/mysubworkflow\"\n- User: \"The snapshot for my pipeline test is failing, can you fix it?\"\n- User: \"Generate nf-tests for the proteinfamilies pipeline\""
-tools: Glob, Grep, Read, WebFetch, WebSearch, Edit, Write, NotebookEdit, Bash, mcp__ide__executeCode
+tools: Glob, Grep, Read, WebFetch, WebSearch, Edit, Write, NotebookEdit, Bash, mcp__ide__executeCode, mcp__savvy-progress__step
 model: sonnet
 color: green
 ---
