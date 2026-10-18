@@ -2,7 +2,9 @@
 
 ## v1.8.0dev — [unreleased]
 
-- `nf-module-manager`: branch guard now passes agents the worktree's absolute path as printed by `git worktree list`. Resolving `../modules-<task>` by hand could send agents to a directory that does not exist
+- `nf-module-manager`:
+    - with the optional [savvy-progress](https://github.com/JohnnyVizz/claude-kit/tree/main/plugins/savvy-progress) mod installed (Claude Code only), the plan and each agent's steps show as progress bars
+    - branch guard now passes agents the worktree's absolute path as printed by `git worktree list`. Resolving `../modules-<task>` by hand could send agents to a directory that does not exist
 
 ## v1.7.0 — [2026/10/17]
 
