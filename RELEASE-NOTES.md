@@ -1,6 +1,6 @@
 # Release Notes
 
-## v1.8.0dev — [unreleased]
+## v1.8.0 — [2026/10/19]
 
 - `nf-module-manager`:
     - with the optional [savvy-progress](https://github.com/JohnnyVizz/claude-kit/tree/main/plugins/savvy-progress) mod installed (Claude Code only), the plan and each agent's steps show as progress bars
