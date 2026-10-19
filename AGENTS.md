@@ -64,6 +64,7 @@ The reference sections replace the old `agent-memory/` directory. When a runtime
 
 - **Claude Code**: full plugin with agents and skills through the Claude marketplace.
 - **Codex**: uses the shared marketplace catalog in `.claude-plugin/marketplace.json` plus the source-controlled Codex manifest in `.codex-plugin/plugin.json`.
+- **Claude Code + [savvy-progress](https://github.com/JohnnyVizz/claude-kit/tree/main/plugins/savvy-progress)** (optional): `nf-module-manager` reports its plan to the progress bar and asks each agent to report its steps. Skipped when the tool is absent (Codex). An agent with a `tools:` list must include `mcp__savvy-progress__step`.
 
 Agents must remain self-contained so their instructions can be reused by Codex generic worker subagents when plugin-named agents are unavailable.
 
