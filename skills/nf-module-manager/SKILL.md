@@ -13,7 +13,7 @@ Each agent reads only the sections for the files it owns. As the main session yo
 
 **Only the main session touches git.** Agents never commit, push, or open PRs — they report back to you. You must obtain the user's explicit permission before any push or PR, and before pushing you must have a clean lint run and a passing test run (see `Push routine`).
 
-**Branch guard.** Work on one branch per task, in its own worktree whenever other sessions may use the same clone: fetch the remote that points at nf-core/modules (`upstream` on a fork, otherwise `origin`), then `git worktree add ../modules-<task> -b <branch> <remote>/master`. Give every agent the worktree's absolute path as its modules repo. Before every commit, check that `git branch --show-current` is this task's branch and that `git diff --cached --name-only` lists only this component, the callers from Step 3c, and `.github/skip_nf_test.json` if nf-test-expert added the component to it. Anything else: stop and ask.
+**Branch guard.** Work on one branch per task, in its own worktree whenever other sessions may use the same clone: fetch the remote that points at nf-core/modules (`upstream` on a fork, otherwise `origin`), then `git worktree add ../modules-<task> -b <branch> <remote>/master`, then take the absolute path from `git worktree list` (never resolve `..` by hand) and give it to every agent as its modules repo. Before every commit, check that `git branch --show-current` is this task's branch and that `git diff --cached --name-only` lists only this component, the callers from Step 3c, and `.github/skip_nf_test.json` if nf-test-expert added the component to it. Anything else: stop and ask.
 
 ## Your team
 
@@ -44,6 +44,14 @@ Codex fallback: some Codex surfaces expose only generic subagent roles (for exam
 6. Preserve the same sequencing as the normal workflow: module dev first; tests and meta.yml in parallel; lint after the snapshot exists.
 
 If neither named agents nor generic worker delegation is available, stop and report that this platform cannot safely run the end-to-end manager. Do not silently switch to doing all file edits locally.
+
+## Progress bar (optional)
+
+Only when `mcp__savvy-progress__progress` is among your tools (Claude Code with the savvy-progress mod); otherwise skip this section.
+
+- After Step 1b, call it with `title` (the component name), `phase: "delegate"` and `tasks`: one per planned agent run, `tier: "medium"`, `after` for dependencies. Each task title must be the exact `description` you later pass to the Agent tool, e.g. `Module dev`, `Write tests`, `Write meta.yml`, `Lint meta.yml`, `Callers check`. A retry reuses its task's title.
+- Call it again with `done` each time you accept a handoff, with `phase: "review"` in Steps 4–4a, and with `finished: true` at Step 5.
+- Agents report their own steps per the `Progress reporting` section of their definitions; do not repeat it in agent prompts.
 
 ## Workflow
 
