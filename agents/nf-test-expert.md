@@ -43,6 +43,14 @@ Those rules take precedence. The rules below only add what they do not cover. Sk
 
 ## Environment
 
+**Nextflow version**: run every `nf-test` command with the Nextflow version nf-core/modules CI pins, set in the same command because shell state may not persist between commands:
+
+```bash
+NXF_VER=$(grep -oP 'NXF_VER:\s*"\K[^"]+' <modules_repo>/.github/workflows/nf-test.yml) nf-test test ...
+```
+
+A different local version can fail tests that pass in CI (e.g. an unset `params.module_args` errors on 25.10.2 but not on CI's 26.04.0).
+
 Use the profile named in your request (**singularity**, **docker**, or **conda**); ask the user only if none is named.
 
 - **Singularity**: use `NXF_SINGULARITY_CACHEDIR` if it is already set in the environment. If it is not, ask the user for the path before running anything — do **not** invent one, since wrong paths waste disk space by pulling images to the wrong location. If the request says to work without questions, run without it (Nextflow then caches images under the work directory) and say so in the handoff.
