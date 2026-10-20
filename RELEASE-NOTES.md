@@ -2,6 +2,8 @@
 
 ## v1.10.0dev — [unreleased]
 
+- `nf-test-expert`: writes the nf-core template assertion order: a bare `assert process.success` first, then `assertAll(...)` with the snapshot. It used to put `process.success` inside `assertAll` and wrongly called that the template
+
 ## v1.9.0 — [2026/10/20]
 
 - `nf-test-expert`: runs nf-test with the Nextflow version nf-core/modules CI pins (`NXF_VER` from `.github/workflows/nf-test.yml`). The local default can differ and fail tests that pass in CI

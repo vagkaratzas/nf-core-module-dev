@@ -119,10 +119,10 @@ nf-test test /path/to/main.nf.test --profile=+singularity --verbose --tag "<test
 
 - Structure: `nextflow_process { name, script, process, tags, [setup], tests }`
 - Tags: always `"modules"`, `"modules_nfcore"`, tool-family tag, `tool/subcommand` tag — **plus one tag per module used in any `setup` block** (e.g. if setup runs `MMSEQS_CREATEDB`, add `tag "mmseqs"` and `tag "mmseqs/createdb"` at the top of the `nextflow_process` block). These dependency tags are mandatory — they cause upstream module changes to re-trigger this module's tests in CI.
-- Assertions, as in the nf-core template — `process.success` inside `assertAll` so every failure is reported together:
+- Assertions, as in the nf-core template — a bare `assert process.success` (`workflow.success` for subworkflows) first, so a crashed process stops with its own error, then `assertAll` for the snapshot:
   ```groovy
+  assert process.success
   assertAll(
-      { assert process.success },
       { assert snapshot(sanitizeOutput(process.out)).match() }
   )
   ```
@@ -133,7 +133,7 @@ nf-test test /path/to/main.nf.test --profile=+singularity --verbose --tag "<test
 
 ## Reference: assertion priority
 
-Everything you assert belongs **inside** `snapshot(...).match()`, inside `assertAll()`. Never assert output content in a bare `assert` outside the snapshot.
+Everything you assert about outputs belongs **inside** `snapshot(...).match()`, inside `assertAll()`. Never assert output content in a bare `assert` outside the snapshot; the only bare assert is the `process.success` / `workflow.success` check before `assertAll`.
 
 ### 1. Full snapshot — always try first
 
