@@ -1,5 +1,7 @@
 # Release Notes
 
+## v1.10.0dev — [unreleased]
+
 ## v1.9.0 — [2026/10/20]
 
 - `nf-test-expert`: runs nf-test with the Nextflow version nf-core/modules CI pins (`NXF_VER` from `.github/workflows/nf-test.yml`). The local default can differ and fail tests that pass in CI
