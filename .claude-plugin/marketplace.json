@@ -1,6 +1,6 @@
 {
   "name": "vagkaratzas",
-  "description": "Marketplace for the nf-core-module-dev plugin",
+  "description": "Marketplace for vagkaratzas' nf-core plugins",
   "interface": {
     "displayName": "vagkaratzas"
   },
@@ -16,6 +16,23 @@
       "source": {
         "source": "url",
         "url": "https://github.com/vagkaratzas/nf-core-module-dev.git"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Bioinformatics",
+      "author": {
+        "name": "Evangelos Karatzas",
+        "email": "vagkaratzas1990@gmail.com"
+      }
+    },
+    {
+      "name": "nf-core-reviewer",
+      "description": "Review and score nf-core/modules pull requests the way vagkaratzas reviews them",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/vagkaratzas/nf-core-reviewer.git"
       },
       "policy": {
         "installation": "AVAILABLE",
