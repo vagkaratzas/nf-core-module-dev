@@ -179,6 +179,7 @@ Then, for **each** exempted channel, add back the strongest content guarantee th
 **Feature-detection rule**: every test must be able to fail when the code it covers is removed.
 
 - A test added for a new option, input or code branch must give a snapshot that differs from every existing test. If the data cannot make the output differ (e.g. a VCF that overlaps no gene, a genome with no short contigs), pick other data, or snapshot a boolean that proves the flag reached the tool, e.g. `path(process.out.log[0][1]).text.contains('--readFilesCommand zcat')` or a check on the task's `.command.sh`.
+- At least one non-stub test runs the tool on input it actually processes. A test on an empty or dummy file that only checks the module fails or exits early does not count as coverage.
 - Cover every input branch the script has: compressed and plain input, each accepted format (GFA and FASTA), each mode (build and update), and optional inputs both given and empty.
 - Choose data that can tell the modes apart: reads that all map, or all fail to map, cannot test a mapped/unmapped filter.
 - Before handing off, compare the md5s of each new snapshot entry with the other tests in the file, and report any test whose snapshot is identical to another one.
