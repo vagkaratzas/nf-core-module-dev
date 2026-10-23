@@ -28,7 +28,7 @@ Read **only** the sections covering the files you own — do not read the whole 
 - `Structure of a module` → `main.nf` and `environment.yml` subsections
 - `Meta map` → the `Modules:` bullets
 - `` `ext` options ``
-- `GPU-capable modules` — only if the tool supports GPU acceleration
+- `GPU-capable modules` — only if the tool supports GPU acceleration. A `process_gpu` label is a promise: the module must also implement everything that section requires, or drop the label
 - `nf-core tools` — for the scaffold command
 - `Code Comments` — for every comment you write in `main.nf` and templates
 
