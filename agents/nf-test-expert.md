@@ -119,6 +119,7 @@ nf-test test /path/to/main.nf.test --profile=+singularity --verbose --tag "<test
 
 - Structure: `nextflow_process { name, script, process, tags, [setup], tests }`
 - Tags: always `"modules"`, `"modules_nfcore"`, tool-family tag, `tool/subcommand` tag — **plus one tag per module used in any `setup` block** (e.g. if setup runs `MMSEQS_CREATEDB`, add `tag "mmseqs"` and `tag "mmseqs/createdb"` at the top of the `nextflow_process` block). These dependency tags are mandatory — they cause upstream module changes to re-trigger this module's tests in CI.
+- Test names follow `<organism> - <inputs> - <outputs/config>`, with square brackets for inputs given together, e.g. `sarscov2 - [ cram, crai ] - fasta - fai` or `homo_sapiens - bam - args_mode`. Stub tests use the same name plus ` - stub`. Never sentence-style names (`"multiple files"`, `"empty fasta"`).
 - Assertions, as in the nf-core template — a bare `assert process.success` (`workflow.success` for subworkflows) first, so a crashed process stops with its own error, then `assertAll` for the snapshot:
   ```groovy
   assert process.success
