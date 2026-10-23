@@ -219,6 +219,7 @@ The first command follows the `include` statements, so it runs the tests of ever
 ## Reference: known pitfalls
 
 - `${projectDir}` resolves to the nf-test root (where `nf-test.config` lives), NOT the test file's directory — so a file at `<modules_repo>/modules/nf-core/tool/tests/file.txt` must be referenced as `file("${projectDir}/modules/nf-core/tool/tests/file.txt", checkIfExists: true)` (full path from the modules repo root).
+- Values that depend on `task.cpus` or memory (thread counts in a log or JSON report, `-t` echoed in a header) differ between your machine and CI. CI uses `tests/config/nf-test.config`, so run with it and keep such fields out of the snapshot (`unstableKeys`, or snapshot a line that does not carry them).
 - GString escaping: in `when { process { """ ... """ } }` triple-quoted blocks, use `\${var}` to pass Nextflow DSL vars evaluated at runtime (not nf-test parse time).
 - `channel.of()` for simple value channels without a setup block: `input[1] = channel.of([ 'value', file("${projectDir}/path/to/file", checkIfExists: true) ])`. For inline-synthesised input data (no fixture file at all), use the `collectFile` pattern shown in the workflow's step 4.
 
