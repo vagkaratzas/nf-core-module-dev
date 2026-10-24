@@ -3,6 +3,13 @@
 ## v1.10.0dev — [unreleased]
 
 - `nf-test-expert`: writes the nf-core template assertion order: a bare `assert process.success` first, then `assertAll(...)` with the snapshot. It used to put `process.success` inside `assertAll` and wrongly called that the template
+- `nf-test-expert`:
+    - names tests `<organism> - <inputs> - <outputs/config>` (stub tests end with ` - stub`), not sentence-style names
+    - keeps values that depend on `task.cpus` or memory, such as thread counts, out of snapshots, so they match CI
+    - writes at least one non-stub test where the tool processes real input; a test on an empty or dummy file no longer counts as coverage
+- `nf-module-dev`:
+    - adds a version output for every package in `environment.yml`, including `python` and helpers such as `tabix` (`htslib`), except generic utilities such as `pip` or `bgzip`, and checks that each version command prints only the number
+    - a `process_gpu` label comes with the full GPU module handling, or the label is dropped
 
 ## v1.9.0 — [2026/10/20]
 

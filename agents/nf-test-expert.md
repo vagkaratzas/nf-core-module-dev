@@ -119,6 +119,7 @@ nf-test test /path/to/main.nf.test --profile=+singularity --verbose --tag "<test
 
 - Structure: `nextflow_process { name, script, process, tags, [setup], tests }`
 - Tags: always `"modules"`, `"modules_nfcore"`, tool-family tag, `tool/subcommand` tag — **plus one tag per module used in any `setup` block** (e.g. if setup runs `MMSEQS_CREATEDB`, add `tag "mmseqs"` and `tag "mmseqs/createdb"` at the top of the `nextflow_process` block). These dependency tags are mandatory — they cause upstream module changes to re-trigger this module's tests in CI.
+- Test names follow `<organism> - <inputs> - <outputs/config>`, with square brackets for inputs given together, e.g. `sarscov2 - [ cram, crai ] - fasta - fai` or `homo_sapiens - bam - args_mode`. Stub tests use the same name plus ` - stub`. Never sentence-style names (`"multiple files"`, `"empty fasta"`).
 - Assertions, as in the nf-core template — a bare `assert process.success` (`workflow.success` for subworkflows) first, so a crashed process stops with its own error, then `assertAll` for the snapshot:
   ```groovy
   assert process.success
@@ -178,6 +179,7 @@ Then, for **each** exempted channel, add back the strongest content guarantee th
 **Feature-detection rule**: every test must be able to fail when the code it covers is removed.
 
 - A test added for a new option, input or code branch must give a snapshot that differs from every existing test. If the data cannot make the output differ (e.g. a VCF that overlaps no gene, a genome with no short contigs), pick other data, or snapshot a boolean that proves the flag reached the tool, e.g. `path(process.out.log[0][1]).text.contains('--readFilesCommand zcat')` or a check on the task's `.command.sh`.
+- At least one non-stub test runs the tool on input it actually processes. A test on an empty or dummy file that only checks the module fails or exits early does not count as coverage.
 - Cover every input branch the script has: compressed and plain input, each accepted format (GFA and FASTA), each mode (build and update), and optional inputs both given and empty.
 - Choose data that can tell the modes apart: reads that all map, or all fail to map, cannot test a mapped/unmapped filter.
 - Before handing off, compare the md5s of each new snapshot entry with the other tests in the file, and report any test whose snapshot is identical to another one.
@@ -218,6 +220,7 @@ The first command follows the `include` statements, so it runs the tests of ever
 ## Reference: known pitfalls
 
 - `${projectDir}` resolves to the nf-test root (where `nf-test.config` lives), NOT the test file's directory — so a file at `<modules_repo>/modules/nf-core/tool/tests/file.txt` must be referenced as `file("${projectDir}/modules/nf-core/tool/tests/file.txt", checkIfExists: true)` (full path from the modules repo root).
+- Values that depend on `task.cpus` or memory (thread counts in a log or JSON report, `-t` echoed in a header) differ between your machine and CI. CI uses `tests/config/nf-test.config`, so run with it and keep such fields out of the snapshot (`unstableKeys`, or snapshot a line that does not carry them).
 - GString escaping: in `when { process { """ ... """ } }` triple-quoted blocks, use `\${var}` to pass Nextflow DSL vars evaluated at runtime (not nf-test parse time).
 - `channel.of()` for simple value channels without a setup block: `input[1] = channel.of([ 'value', file("${projectDir}/path/to/file", checkIfExists: true) ])`. For inline-synthesised input data (no fixture file at all), use the `collectFile` pattern shown in the workflow's step 4.
 
