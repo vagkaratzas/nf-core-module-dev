@@ -8,7 +8,7 @@
     - keeps values that depend on `task.cpus` or memory, such as thread counts, out of snapshots, so they match CI
     - writes at least one non-stub test where the tool processes real input; a test on an empty or dummy file no longer counts as coverage
 - `nf-module-dev`:
-    - adds a version output for every tool the script calls, including helpers such as `bgzip` (`htslib`), and checks that each version command prints only the number
+    - adds a version output for every package in `environment.yml`, including `python` and helpers such as `tabix` (`htslib`), except generic utilities such as `pip` or `bgzip`, and checks that each version command prints only the number
     - a `process_gpu` label comes with the full GPU module handling, or the label is dropped
 
 ## v1.9.0 — [2026/10/20]

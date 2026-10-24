@@ -146,7 +146,7 @@ tuple val("${task.process}"), val('toolname'), eval("tool --version 2>&1 | sed '
 Rules:
 - `topic: versions` — NO quotes around `versions` (unlike the string `'versions'` in the old path-based approach).
 - The emitted version string MUST be bare numeric (`1.0.0`) — no `v` prefix, no tool name, no commit hash suffix. Strip any prefix with `sed`/`awk` inside the `eval`.
-- Each tool in a multi-tool module needs its own `versions_<tool>` emit channel. That includes helpers the script calls in passing: a `bgzip` or `tabix` call means `htslib` is in `environment.yml` and gets `versions_htslib`.
+- Every package in `environment.yml` needs its own `versions_<tool>` emit channel, including helpers the script calls in passing (a `tabix` call means `htslib` gets `versions_htslib`) and `python` whenever it is listed. Generic utilities (`pip`, `gzip`, `pigz`, `bgzip`, `coreutils`, `procps-ng`, `gawk`, `sed`, `grep`, `tar`, `bzip2`, `findutils`, `unzip`) are optional.
 - Run each `eval` command in the built container and confirm it prints only the number. Tools that print usage text on `--version` need a stricter `sed`/`grep`.
 - For tools with no CLI version flag, hardcode the version under the nf-core standard comment, word for word (as in `bigslice/bigslice`). Only do this after checking `--version`, `-v`, `version` and `--help` in the image:
   ```nextflow
