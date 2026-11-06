@@ -90,6 +90,8 @@ Tell both agents to list in their handoff notes any **upstream limitation that f
 
 Wait for BOTH to complete before proceeding.
 
+Before lint and before any commit, wait until every agent is idle: a resumed agent can still be finishing background work and rewrite a file after a later step (e.g. `meta.yml` after `containers create`). Check an agent's claims about files it does not own on disk — a handoff note can describe another agent's file as it was when the agent last looked.
+
 ### Step 3b — Lint (after snapshot exists)
 
 Once nf-core-module-dev:nf-test-expert confirms the snapshot is generated, instruct **nf-core-module-dev:nf-secretary** to run lint.
