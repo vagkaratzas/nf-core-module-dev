@@ -79,7 +79,7 @@ Read all 5. Note any patterns not in the reference sections below and update run
 
 1. **Calibrate**: Run startup study above
 2. **Examine `main.nf`**: Inputs, outputs, emit names, parameters
-3. **Check for configs**: If a module-root `nextflow.config` exists, inspect it as runtime configuration but do not create or modify it for a test. Keep test-only configuration in `tests/nextflow.config`; per-test `ext.args` go through `module_args`:
+3. **Check for configs**: If a module-root `nextflow.config` exists, inspect it as runtime configuration but do not create or modify it for a test. Keep test-only configuration in `tests/nextflow.config`, and create that file only when a test needs it — at least one test sets `module_args`, or another setting is required. Reviewers reject an unused config and empty `module_args` blocks. Per-test `ext.args` go through `module_args`:
 ```
 process {
   withName: 'TOOL_SUBCOMMAND' {
