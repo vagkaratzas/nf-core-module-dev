@@ -10,6 +10,8 @@
 - `nf-module-dev`:
     - adds a version output for every package in `environment.yml`, including `python` and helpers such as `tabix` (`htslib`), except generic utilities such as `pip` or `bgzip`, and checks that each version command prints only the number
     - a `process_gpu` label comes with the full GPU module handling, or the label is dropped
+    - assumes only `meta.id` and `meta.single_end`, as AGENTS.md says, although nf-core tools 4.2.0 lint also accepts `meta.strandedness`
+- README: requires nf-core tools 4.2.0. Older versions write the container directive with `?`/`:` at column 0, which has to be fixed by hand
 
 ## v1.9.0 — [2026/10/20]
 
