@@ -1,5 +1,18 @@
 # Release Notes
 
+## v1.10.0 — [2026/11/06]
+
+- `nf-test-expert`: writes the nf-core template assertion order: a bare `assert process.success` first, then `assertAll(...)` with the snapshot. It used to put `process.success` inside `assertAll` and wrongly called that the template
+- `nf-test-expert`:
+    - names tests `<organism> - <inputs> - <outputs/config>` (stub tests end with ` - stub`), not sentence-style names
+    - keeps values that depend on `task.cpus` or memory, such as thread counts, out of snapshots, so they match CI
+    - writes at least one non-stub test where the tool processes real input; a test on an empty or dummy file no longer counts as coverage
+- `nf-module-dev`:
+    - adds a version output for every package in `environment.yml`, including `python` and helpers such as `tabix` (`htslib`), except generic utilities such as `pip` or `bgzip`, and checks that each version command prints only the number
+    - a `process_gpu` label comes with the full GPU module handling, or the label is dropped
+    - assumes only `meta.id` and `meta.single_end`, as AGENTS.md says, although nf-core tools 4.2.0 lint also accepts `meta.strandedness`
+- README: requires nf-core tools 4.2.0. Older versions write the container directive with `?`/`:` at column 0, which has to be fixed by hand
+
 ## v1.9.0 — [2026/10/20]
 
 - `nf-test-expert`: runs nf-test with the Nextflow version nf-core/modules CI pins (`NXF_VER` from `.github/workflows/nf-test.yml`). The local default can differ and fail tests that pass in CI

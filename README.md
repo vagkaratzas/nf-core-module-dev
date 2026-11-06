@@ -97,7 +97,7 @@ For targeted work, agents can be invoked directly:
 
 - [Claude Code](https://claude.ai/code) or Codex CLI
 - A local clone of [nf-core/modules](https://github.com/nf-core/modules)
-- `nf-core` CLI ≥ 4.1.0 on your PATH (the dev version is what nf-core/modules CI lints with; `containers create` is still marked beta)
+- `nf-core` CLI ≥ 4.2.0 on your PATH (the dev version is what nf-core/modules CI lints with; `containers create` is still marked beta). Older versions write the container directive with `?`/`:` at column 0, which then has to be fixed by hand
 - `TOWER_ACCESS_TOKEN` exported (a free Seqera Platform token): the agent builds containers on Wave with your quota, and without a token Wave allows only 25 builds a day (4 per module)
 - `nf-test` installed and on your PATH
 - Singularity, Docker, or conda for running tests
