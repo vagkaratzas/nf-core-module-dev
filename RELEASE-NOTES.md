@@ -1,5 +1,7 @@
 # Release Notes
 
+## v1.13.0dev — [unreleased]
+
 ## v1.12.0 — [2026/11/06]
 
 Fixes from a second, external review of nf-core/modules#13618 and #13619:
