@@ -154,7 +154,7 @@ Do **not** hand-pick stable channels one by one. Keep the full snapshot and exem
 
 `unstableKeys` takes emit channel names, not file paths. List only the genuinely unstable channels.
 
-Then, for **each** exempted channel, add back the strongest content guarantee that is still stable (if possible), as a further argument to the same `snapshot(...)` call. Work down the following two options per channel — a module may land on a different rung for each:
+Then, for **each** exempted channel, add back the strongest content guarantee that is still stable (if possible), as a further argument to the same `snapshot(...)` call. Work down the following options per channel — a module may land on a different rung for each. Run the test twice before settling on a rung: a log's line count can change between runs (e.g. an extra progress line).
 
 **2a. Line count** — content varies, length does not:
 ```groovy
@@ -173,6 +173,14 @@ Then, for **each** exempted channel, add back the strongest content guarantee th
 ).match() }
 ```
 `.contains(...)` returns a boolean, which snapshots cleanly. Pick a line the tool always emits — never one whose presence is incidental.
+
+**2c. Normalised line** — stronger than 2b when a line the tool always writes carries counts but also timings or paths: snapshot that line with the unstable parts stripped:
+```groovy
+{ assert snapshot(
+    sanitizeOutput(process.out, unstableKeys: ["log"]),
+    process.out.log.collect { meta, log -> file(log).readLines().find { it.contains('members rows=') }.replaceAll(/^.*members rows=| elapsed=.*/, '') }
+).match() }
+```
 
 **Empty-output rule**: Real (non-stub) tests must NOT snapshot md5sums of empty files. If a snapshot captures a `d41d8cd98f00b204e9800998ecf8427e` (empty-file MD5), the tool produced no output — fix the test data or disregard that channel output completely.
 
