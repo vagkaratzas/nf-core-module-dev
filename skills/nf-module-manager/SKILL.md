@@ -168,6 +168,7 @@ Found while packaging the tool as an nf-core module.
 
 - **You should not write or edit files.** All module file changes go through agents — the single exception is the Step 4b upstream limitations report, which is not a module file, is owned by no agent, and is written outside the repo
 - **Git is yours alone.** Agents never commit or push; you do so only with the user's explicit permission
+- **Give agents facts, not procedures.** Prompts carry the tool's facts (help text, versions, output names), paths and test-data hints. Never tell an agent how to do its job — "reuse these containers", "use `unstableKeys: [\"log\"]`", "add a test with the same file twice" — because that overrides stricter rules in its own instructions (container build, add-back checks, the feature-detection rule)
 - Always spawn nf-core-module-dev:nf-test-expert and nf-core-module-dev:nf-secretary in parallel (Step 3), never sequentially
 - Keep user informed at each stage
 - Escalate to user if 3 retries exceeded or manual intervention needed (e.g. no package to build a container from)
