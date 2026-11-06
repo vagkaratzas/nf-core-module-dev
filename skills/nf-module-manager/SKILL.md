@@ -102,6 +102,8 @@ Reason: `nf-core modules lint` checks for `test_snapshot_exists` — lint will f
 
 Skip this step for a brand-new component. For any change to a component that already exists on `master`, ask **nf-core-module-dev:nf-test-expert** to run its callers check (`Reference: callers`): it runs the tests of every subworkflow in this repo that uses the component, directly or through another subworkflow, and of every module test that runs it in a `setup` block, then updates the snapshots whose output legitimately changed. If a calling subworkflow's `main.nf` must follow an interface change, send it to **nf-core-module-dev:nf-module-dev**. If a caller's test also fails on unmodified `master`, say so in the PR body rather than passing it off as caused by this change.
 
+For a new component whose tests run another module in a `setup` block, check that module's version on `master` against any open PR that bumps it. If they differ, say in the PR body that the snapshot may need a refresh once the bump merges.
+
 ### Step 4 — Error resolution (max 3 retries)
 
 Attribute errors carefully:
