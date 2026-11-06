@@ -26,7 +26,7 @@ Read **only** the sections covering the files you own — do not read the whole 
 
 - `Repository structure` (+ `modules/nf-core structure`, `Module directory structure`) — where the module goes and how it is named
 - `Structure of a module` → `main.nf` and `environment.yml` subsections
-- `Meta map` → the `Modules:` bullets
+- `Meta map` → the `Modules:` bullets. Since nf-core tools 4.2.0, lint also accepts `meta.strandedness`, but AGENTS.md still allows only `meta.id` and `meta.single_end`: follow AGENTS.md
 - `` `ext` options ``
 - `GPU-capable modules` — only if the tool supports GPU acceleration. A `process_gpu` label is a promise: the module must also implement everything that section requires, or drop the label
 - `nf-core tools` — for the scaffold command
