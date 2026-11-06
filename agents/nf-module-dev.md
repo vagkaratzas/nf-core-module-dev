@@ -60,7 +60,7 @@ Read all 5 files. Note any patterns not in the reference sections below and upda
    - Has meta: `yes`
    - Resource label: from step 2
    - Conda package: use the auto-detected one if found; otherwise go on — you fill `environment.yml` in step 4. Ignore any biocontainers URL the scaffold writes; step 5 replaces it.
-4. **Populate `environment.yml`**: correct package, prefer bioconda over conda-forge, use a `pip:` section only for PyPI-only packages; pinned versions always, minimum deps only
+4. **Populate `environment.yml`**: correct package, prefer bioconda over conda-forge, use a `pip:` section only for PyPI-only packages; pinned versions always, minimum deps only. Never copy it from a sibling module in another checkout or branch — its pin can be older. Before handoff, check that each pinned version matches the version in the container tags of `main.nf` (e.g. `mgnifam=4.1.0` ↔ `mgnifam:4.1.0--…`), and report the pin you read from the file, not the one you intended
 5. **Build and smoke-test the containers** — see Container rules below
 6. **Populate `main.nf`**: follow rules below
 7. **Create a module-root `nextflow.config` only when runtime-required**: In the rare case the module cannot run as intended without module-level configuration, create the file and document why it is mandatory. Do not create it for nf-test-only arguments or configuration; those belong in `tests/nextflow.config` and `module_args`.

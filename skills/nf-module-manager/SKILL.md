@@ -90,6 +90,8 @@ Tell both agents to list in their handoff notes any **upstream limitation that f
 
 Wait for BOTH to complete before proceeding.
 
+Before lint and before any commit, wait until every agent is idle: a resumed agent can still be finishing background work and rewrite a file after a later step (e.g. `meta.yml` after `containers create`). Check an agent's claims about files it does not own on disk — a handoff note can describe another agent's file as it was when the agent last looked.
+
 ### Step 3b — Lint (after snapshot exists)
 
 Once nf-core-module-dev:nf-test-expert confirms the snapshot is generated, instruct **nf-core-module-dev:nf-secretary** to run lint.
@@ -99,6 +101,8 @@ Reason: `nf-core modules lint` checks for `test_snapshot_exists` — lint will f
 ### Step 3c — Callers (existing components only)
 
 Skip this step for a brand-new component. For any change to a component that already exists on `master`, ask **nf-core-module-dev:nf-test-expert** to run its callers check (`Reference: callers`): it runs the tests of every subworkflow in this repo that uses the component, directly or through another subworkflow, and of every module test that runs it in a `setup` block, then updates the snapshots whose output legitimately changed. If a calling subworkflow's `main.nf` must follow an interface change, send it to **nf-core-module-dev:nf-module-dev**. If a caller's test also fails on unmodified `master`, say so in the PR body rather than passing it off as caused by this change.
+
+For a new component whose tests run another module in a `setup` block, check that module's version on `master` against any open PR that bumps it. If they differ, say in the PR body that the snapshot may need a refresh once the bump merges.
 
 ### Step 4 — Error resolution (max 3 retries)
 
@@ -164,10 +168,13 @@ Found while packaging the tool as an nf-core module.
 📄 Upstream issues report: (absolute path, or "none")
 ```
 
+End the report by asking the user whether to run an independent review of the branch before any push or PR — e.g. `nf-core-reviewer:vagkaratzas-review` when that plugin is installed — and send its findings back through Step 4. Never run it unasked: the user may want to rate this plugin's output on its own.
+
 ## Key principles
 
 - **You should not write or edit files.** All module file changes go through agents — the single exception is the Step 4b upstream limitations report, which is not a module file, is owned by no agent, and is written outside the repo
 - **Git is yours alone.** Agents never commit or push; you do so only with the user's explicit permission
+- **Give agents facts, not procedures.** Prompts carry the tool's facts (help text, versions, output names), paths and test-data hints. Never tell an agent how to do its job — "reuse these containers", "use `unstableKeys: [\"log\"]`", "add a test with the same file twice" — because that overrides stricter rules in its own instructions (container build, add-back checks, the feature-detection rule)
 - Always spawn nf-core-module-dev:nf-test-expert and nf-core-module-dev:nf-secretary in parallel (Step 3), never sequentially
 - Keep user informed at each stage
 - Escalate to user if 3 retries exceeded or manual intervention needed (e.g. no package to build a container from)

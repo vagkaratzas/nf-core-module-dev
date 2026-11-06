@@ -79,7 +79,7 @@ Read all 5. Note any patterns not in the reference sections below and update run
 
 1. **Calibrate**: Run startup study above
 2. **Examine `main.nf`**: Inputs, outputs, emit names, parameters
-3. **Check for configs**: If a module-root `nextflow.config` exists, inspect it as runtime configuration but do not create or modify it for a test. Keep test-only configuration in `tests/nextflow.config`; per-test `ext.args` go through `module_args`:
+3. **Check for configs**: If a module-root `nextflow.config` exists, inspect it as runtime configuration but do not create or modify it for a test. Keep test-only configuration in `tests/nextflow.config`, and create that file only when a test needs it — at least one test sets `module_args`, or another setting is required. Reviewers reject an unused config and empty `module_args` blocks. Per-test `ext.args` go through `module_args`:
 ```
 process {
   withName: 'TOOL_SUBCOMMAND' {
@@ -154,7 +154,7 @@ Do **not** hand-pick stable channels one by one. Keep the full snapshot and exem
 
 `unstableKeys` takes emit channel names, not file paths. List only the genuinely unstable channels.
 
-Then, for **each** exempted channel, add back the strongest content guarantee that is still stable (if possible), as a further argument to the same `snapshot(...)` call. Work down the following two options per channel — a module may land on a different rung for each:
+Then, for **each** exempted channel, add back the strongest content guarantee that is still stable (if possible), as a further argument to the same `snapshot(...)` call. Work down the following options per channel — a module may land on a different rung for each. Run the test twice before settling on a rung: a log's line count can change between runs (e.g. an extra progress line).
 
 **2a. Line count** — content varies, length does not:
 ```groovy
@@ -174,15 +174,23 @@ Then, for **each** exempted channel, add back the strongest content guarantee th
 ```
 `.contains(...)` returns a boolean, which snapshots cleanly. Pick a line the tool always emits — never one whose presence is incidental.
 
+**2c. Normalised line** — stronger than 2b when a line the tool always writes carries counts but also timings or paths: snapshot that line with the unstable parts stripped:
+```groovy
+{ assert snapshot(
+    sanitizeOutput(process.out, unstableKeys: ["log"]),
+    process.out.log.collect { meta, log -> file(log).readLines().find { it.contains('members rows=') }.replaceAll(/^.*members rows=| elapsed=.*/, '') }
+).match() }
+```
+
 **Empty-output rule**: Real (non-stub) tests must NOT snapshot md5sums of empty files. If a snapshot captures a `d41d8cd98f00b204e9800998ecf8427e` (empty-file MD5), the tool produced no output — fix the test data or disregard that channel output completely.
 
 **Feature-detection rule**: every test must be able to fail when the code it covers is removed.
 
 - A test added for a new option, input or code branch must give a snapshot that differs from every existing test. If the data cannot make the output differ (e.g. a VCF that overlaps no gene, a genome with no short contigs), pick other data, or snapshot a boolean that proves the flag reached the tool, e.g. `path(process.out.log[0][1]).text.contains('--readFilesCommand zcat')` or a check on the task's `.command.sh`.
 - At least one non-stub test runs the tool on input it actually processes. A test on an empty or dummy file that only checks the module fails or exits early does not count as coverage.
-- Cover every input branch the script has: compressed and plain input, each accepted format (GFA and FASTA), each mode (build and update), and optional inputs both given and empty.
+- Cover every input branch the script has: compressed and plain input, each accepted format (GFA and FASTA), each mode (build and update), and optional inputs both given and empty. When the data needs the optional input (e.g. some members require the FASTA), filter it in the test so the empty case runs, rather than dropping the test.
 - Choose data that can tell the modes apart: reads that all map, or all fail to map, cannot test a mapped/unmapped filter.
-- Before handing off, compare the md5s of each new snapshot entry with the other tests in the file, and report any test whose snapshot is identical to another one.
+- Before handing off, compare the md5s of each new snapshot entry with the other tests in the file. Fix any test whose snapshot is identical to another one (other data, or a check that proves its branch ran); hand it off unchanged only with the reason no data can tell the cases apart. Feeding the same file twice is not a new case.
 
 ## Reference: topic-based versions
 
