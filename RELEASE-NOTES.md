@@ -1,6 +1,6 @@
 # Release Notes
 
-## v1.11.0dev — [unreleased]
+## v1.11.0 — [2026/11/06]
 
 Fixes from the review of the `mgnifam/computeclans` build (nf-core/modules#13619):
 
