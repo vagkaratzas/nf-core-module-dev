@@ -105,6 +105,7 @@ Containers are Seqera Wave builds of `environment.yml`, and you make them yourse
 - **Script body**:
   - No hardcoded params — use `$task.cpus`, `ext.args`, `ext.args2` etc.
   - Use forced redirection `2>|` instead of `2>` (nf-core enables noclobber).
+  - When the tool has a temp/scratch option that defaults to the system temp (`$TMPDIR`, `/tmp`), point it at the task work directory (`--tmp_dir .`, `-T .`) before `${args}`, so `ext.args` can still override it. Node temp can be small on HPC. Report in the handoff if the tool needs fast local scratch instead.
   - Quote every interpolated path and value that may contain spaces: `-o "${prefix}.pretext"`, `-canonList "${canon_list}"`. For optionally compressed input, use `zcat -f` (or `gzip -cdf`) rather than branching on the `.gz` suffix, which misses `.bgz` and other names.
   - Inline scripts up to ~20 lines are fine; anything longer belongs in `templates/<module>.<ext>` and the script block becomes `template '<module>.<ext>'`.
 - **Stub block**:

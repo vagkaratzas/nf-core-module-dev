@@ -113,6 +113,7 @@ Singularity `name` MUST be `oras://`; singularity entries MUST have `https`; `lo
 - If an input entry is not mandatory, mark it as **Optional** in its `description` text — there is no separate schema field for this.
 - Keep descriptions as compact as possible — one short line stating what the element is. Do not restate the tool's manual or upstream docs. Add a second line ONLY for module-specific behaviour a user cannot learn from the tool's own documentation (e.g. this input is consumed only when another input is present, an output is emitted only under a given flag).
 - File entries: always include `pattern` (Java glob syntax) and `ontologies` (see EDAM coverage rule below).
+- An input `pattern` covers every compression the tool reads: when it accepts gzipped input (check `--help`, the docs, or a run on a `.gz` file), list both forms (`*.{fa,fa.gz,fasta,fasta.gz}`) and add the GZIP term (`format_3989`).
 - `type:` values are restricted to: `map`, `file`, `directory`, `string`, `boolean`, `integer`, `float`, `list`. Anything else fails schema validation.
 
 ### Output block

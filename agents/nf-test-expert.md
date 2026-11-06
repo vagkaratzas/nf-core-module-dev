@@ -174,13 +174,17 @@ Then, for **each** exempted channel, add back the strongest content guarantee th
 ```
 `.contains(...)` returns a boolean, which snapshots cleanly. Pick a line the tool always emits — never one whose presence is incidental.
 
-**2c. Normalised line** — stronger than 2b when a line the tool always writes carries counts but also timings or paths: snapshot that line with the unstable parts stripped:
+**2c. Result fields of a line** — stronger than 2b when a line the tool always writes carries result counts next to timings, paths or CPU-dependent values (threads, batches, task splits). Pick out the result fields by name rather than stripping the rest, so a CPU-dependent field can never slip in:
 ```groovy
 { assert snapshot(
     sanitizeOutput(process.out, unstableKeys: ["log"]),
-    process.out.log.collect { meta, log -> file(log).readLines().find { it.contains('members rows=') }.replaceAll(/^.*members rows=| elapsed=.*/, '') }
+    // log line: "Done: reads=1000 kept=950 threads=4 elapsed=2.1s"
+    path(process.out.log[0][1]).readLines().find { line -> line.startsWith('Done:') }.findAll(/(?:reads|kept)=\S+/)
 ).match() }
 ```
+Every name in the pattern must appear in that test's snapshot; one that never matches checks nothing.
+
+Once a value is in the snapshot, drop any separate `assert` on the same value — it only repeats the check.
 
 **Empty-output rule**: Real (non-stub) tests must NOT snapshot md5sums of empty files. If a snapshot captures a `d41d8cd98f00b204e9800998ecf8427e` (empty-file MD5), the tool produced no output — fix the test data or disregard that channel output completely.
 
