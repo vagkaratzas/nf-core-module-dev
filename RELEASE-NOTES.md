@@ -2,6 +2,20 @@
 
 ## v1.11.0dev — [unreleased]
 
+Fixes from the review of the `mgnifam/computeclans` build (nf-core/modules#13619):
+
+- `nf-module-manager`:
+    - gives agents facts, paths and test-data hints, never procedures. Prompts that said "reuse these containers", "use `unstableKeys`" or "add a test with the same file twice" overrode stricter agent rules and caused most of the review findings
+    - waits until every agent is idle before lint and commit, and checks on disk what an agent says about files it does not own. A resumed agent could still be writing after a later step had run
+    - for a new component whose tests run another module in `setup`, notes in the PR body when that module has a pending version bump, since the snapshot may then need a refresh
+    - ends by asking whether to run an independent review (e.g. `nf-core-reviewer:vagkaratzas-review`) before any push or PR. It never runs it unasked, so the plugin's own output can still be rated alone
+- `nf-test-expert`:
+    - creates `tests/nextflow.config` only when a test uses it; an unused config with empty `module_args` blocks was rejected in review
+    - runs a test twice before trusting a log's line count, and gains a third add-back option: a line the tool always writes, with timings and paths stripped
+    - fixes a test whose snapshot matches another instead of only reporting it; the same file passed twice is not a new case
+    - when the test data needs an optional input, filters the data so the "input left out" test can still run
+- `nf-module-dev`: checks that each `environment.yml` pin matches the version in the container tags and reports the pin read from the file. A pin copied from a sibling in another checkout shipped as 4.0.0 against 4.1.0 containers and was reported as 4.1.0
+
 ## v1.10.0 — [2026/11/06]
 
 - `nf-test-expert`: writes the nf-core template assertion order: a bare `assert process.success` first, then `assertAll(...)` with the snapshot. It used to put `process.success` inside `assertAll` and wrongly called that the template
