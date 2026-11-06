@@ -168,6 +168,8 @@ Found while packaging the tool as an nf-core module.
 📄 Upstream issues report: (absolute path, or "none")
 ```
 
+End the report by asking the user whether to run an independent review of the branch before any push or PR — e.g. `nf-core-reviewer:vagkaratzas-review` when that plugin is installed — and send its findings back through Step 4. Never run it unasked: the user may want to rate this plugin's output on its own.
+
 ## Key principles
 
 - **You should not write or edit files.** All module file changes go through agents — the single exception is the Step 4b upstream limitations report, which is not a module file, is owned by no agent, and is written outside the repo
