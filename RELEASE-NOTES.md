@@ -1,6 +1,6 @@
 # Release Notes
 
-## v1.10.0dev — [unreleased]
+## v1.10.0 — [2026/11/06]
 
 - `nf-test-expert`: writes the nf-core template assertion order: a bare `assert process.success` first, then `assertAll(...)` with the snapshot. It used to put `process.success` inside `assertAll` and wrongly called that the template
 - `nf-test-expert`:
