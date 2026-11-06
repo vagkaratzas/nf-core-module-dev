@@ -2,6 +2,17 @@
 
 ## v1.12.0dev — [unreleased]
 
+Fixes from a second, external review of nf-core/modules#13618 and #13619:
+
+- `nf-test-expert`:
+    - the v1.11.0 "normalised line" option kept a CPU-dependent field in its example. It now picks a log line's result fields by name, so threads, batches and task splits stay out of the snapshot, and the example is no longer module-specific
+    - every name in such a pattern must appear in the test's snapshot, and a separate `assert` on a value the snapshot already holds is dropped
+- `nf-secretary`: an input `pattern` covers every compression the tool reads, with both forms and the GZIP term when it accepts gzipped input
+- `nf-module-dev`: when the tool has a temp/scratch option that defaults to the system temp, the script points it at the task work directory before `${args}`, so `ext.args` can still override it. Node temp can be small on HPC
+- `nf-module-manager`:
+    - updates the PR body after each review round so it describes the final diff, and ticks the Docker and Conda boxes once CI passed on them
+    - notes a pending version bump of a `setup` module only when the md5s of the outputs the tests consume change
+
 ## v1.11.0 — [2026/11/06]
 
 Fixes from the review of the `mgnifam/computeclans` build (nf-core/modules#13619):
